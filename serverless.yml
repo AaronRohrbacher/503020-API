@@ -1,0 +1,135 @@
+service: 503020
+
+plugins:
+  - serverless-dynamodb-local
+  - serverless-offline
+  - serverless-offline-local-authorizers-plugin
+
+custom:
+  budgetsTableName: "budgets-${self:provider.stage}"
+  budgetItemsTableName: "budget-items-${self:provider.stage}"
+  dynamodb:
+    stages:
+      - dev
+  serverless-offline:
+    noPrependStageInUrl: true
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: dev
+  region: us-west-2
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+        - cognito-idp:AdminInitiateAuth
+        - cognito-idp:AdminCreateUser
+        - cognito-idp:AdminSetUserPassword
+      Resource:
+        - { "Fn::GetAtt": ["BudgetsDynamoDBTable", "Arn"] }
+        - { "Fn::GetAtt": ["BudgetItemsDynamoDBTable", "Arn"] }
+        - { "Fn::GetAtt": ["503020UserPool", "Arn"] }
+  environment:
+    BUDGETS_TABLE: ${self:custom.budgetsTableName}
+    BUDGET_ITEMS_TABLE: ${self:custom.budgetItemsTableName}
+    user_pool_id: { Ref: 503020UserPool }
+    client_id: { Ref: 503020UserPoolClient }
+
+functions:
+  login:
+    handler: auth/login.handler
+    events:
+      - http:
+          path: /login
+          method: post
+  userData:
+    handler: userData.handler
+    events:
+      - http: 
+          path: /userData
+          method: ANY
+          integration: lambda
+          authorizer:
+            name: 503020_authorizer
+            type: COGNITO_USER_POOLS
+            arn: 
+              Fn::GetAtt: 
+                - 503020UserPool 
+                - Arn
+            claims:
+              - phone_number
+          localAuthorizer:
+            name: "mylocalAuthProxyFn"
+            type: "request"
+
+resources:
+  Resources:
+    BudgetsDynamoDBTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: budgetName
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH
+          - AttributeName: budgetName
+            KeyType: HASH
+        TableName: ${self:custom.budgetsTableName}
+    BudgetsItemsDynamoDBTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: budgetId
+            AttributeType: S
+          - AttributeName: budgetItemName
+            AttributeType: S
+          - AttributeName: dueDate
+            AttributeType: S
+          - AttributeName: category
+            AttributeType: S
+        KeySchema:
+          - AttributeName: budgetId
+            KeyType: HASH
+          - AttributeName: budgetItemName
+            KeyType: HASH
+          - AttributeName: dueDate
+            KeyType: HASH
+          - AttributeName: category
+            KeyType: HASH
+        TableName: ${self:custom.budgetItemsTableName}
+    503020UserPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        UserPoolName: ${self:provider.stage}-503020-user-pool
+        Schema:
+          - Name: phone_number
+            Required: true
+            Mutable: false
+        Policies:
+          PasswordPolicy:
+            MinimumLength: 6
+        UsernameAttributes:
+          - phone_number
+        AutoVerifiedAttributes:
+          - phone_number
+    503020UserPoolClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        ClientName: ${self:provider.stage}-503020-user-pool-client
+        GenerateSecret: false
+        UserPoolId:
+          Ref: 503020UserPool
+        AccessTokenValidity: 5
+        IdTokenValidity: 5
+        ExplicitAuthFlows:
+          - ADMIN_NO_SRP_AUTH
+
