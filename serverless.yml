@@ -1,4 +1,4 @@
-service: 503020
+service: fifty-thirty-twenty
 
 plugins:
   - serverless-dynamodb-local
@@ -63,7 +63,7 @@ functions:
                 - 503020UserPool 
                 - Arn
             claims:
-              - phone_number
+              - email
           localAuthorizer:
             name: "mylocalAuthProxyFn"
             type: "request"
@@ -82,45 +82,39 @@ resources:
           - AttributeName: userId
             KeyType: HASH
           - AttributeName: budgetName
-            KeyType: HASH
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1       
         TableName: ${self:custom.budgetsTableName}
-    BudgetsItemsDynamoDBTable:
+    BudgetItemsDynamoDBTable:
       Type: "AWS::DynamoDB::Table"
       Properties:
         AttributeDefinitions:
           - AttributeName: budgetId
             AttributeType: S
-          - AttributeName: budgetItemName
-            AttributeType: S
-          - AttributeName: dueDate
-            AttributeType: S
-          - AttributeName: category
-            AttributeType: S
         KeySchema:
           - AttributeName: budgetId
             KeyType: HASH
-          - AttributeName: budgetItemName
-            KeyType: HASH
-          - AttributeName: dueDate
-            KeyType: HASH
-          - AttributeName: category
-            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
         TableName: ${self:custom.budgetItemsTableName}
     503020UserPool:
       Type: AWS::Cognito::UserPool
       Properties:
         UserPoolName: ${self:provider.stage}-503020-user-pool
         Schema:
-          - Name: phone_number
+          - Name: email
             Required: true
             Mutable: false
         Policies:
           PasswordPolicy:
             MinimumLength: 6
         UsernameAttributes:
-          - phone_number
+          - email
         AutoVerifiedAttributes:
-          - phone_number
+          - email
     503020UserPoolClient:
       Type: AWS::Cognito::UserPoolClient
       Properties:

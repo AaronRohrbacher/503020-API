@@ -1,5 +1,9 @@
 {
   "dependencies": {
     "serverless-dynamodb-local": "^0.2.40"
+  },
+  "devDependencies": {
+    "serverless-offline": "^12.0.4",
+    "serverless-offline-local-authorizers-plugin": "^1.2.0"
   }
 }
