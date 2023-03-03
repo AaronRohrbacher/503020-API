@@ -52,8 +52,8 @@ functions:
     handler: userData.handler
     events:
       - http: 
-          path: /userData
-          method: ANY
+          path: /
+          method: post
           integration: lambda
           authorizer:
             name: 503020_authorizer
@@ -67,6 +67,13 @@ functions:
           localAuthorizer:
             name: "mylocalAuthProxyFn"
             type: "request"
+  budgets:
+    handler: userData.handler
+    events:
+      - http:
+          path: /budgets
+          method: post
+
 
 resources:
   Resources:
