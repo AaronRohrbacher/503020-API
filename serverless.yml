@@ -1,8 +1,8 @@
 service: fifty-thirty-twenty
 
 plugins:
-  - serverless-dynamodb-local
   - serverless-offline
+  - serverless-dynamodb-local
   - serverless-offline-local-authorizers-plugin
 
 custom:
@@ -11,8 +11,17 @@ custom:
   dynamodb:
     stages:
       - dev
+    start:
+      port: 8000
+      inMemory: true
+      heapInitial: 200m
+      heapMax: 1g
+      migrate: true
+      seed: true
+      convertEmptyValues: true
   serverless-offline:
     noPrependStageInUrl: true
+    reloadHandler: true
 
 provider:
   name: aws

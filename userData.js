@@ -43,7 +43,7 @@ app.post('/', function (req, res) {
     }
     if (result.Item) {
       const { budgetName } = result.Item;
-      res.json({ userId, name });
+      res.json({ userId, budgetName });
     } else {
       res.status(404).json({ error: "budgets not found" });
     }
@@ -51,16 +51,16 @@ app.post('/', function (req, res) {
 })
 
 app.post('/budgets', function (req, res) {
-  const { userId, budgetName } = req.body;
+  const { userId, budgetName } = JSON.parse(req.apiGateway.event.body);
   if (typeof userId !== 'string') {
     console.log(userId)
     return res.status(400).json({ error: '"userId" must be a string' });
-  } else if (typeof name !== 'string') {
+  } else if (typeof budgetName !== 'string') {
     return res.status(400).json({ error: '"name" must be a string' });
   }
 
   const params = {
-    TableName: "budgetsTable",
+    TableName: process.env.BUDGETS_TABLE,
     Item: {
       userId: userId,
       budgetName: budgetName,
@@ -70,7 +70,7 @@ app.post('/budgets', function (req, res) {
   dynamoDb.put(params, (error) => {
     if (error) {
       console.log(error);
-      return res.status(400).json( error );
+      return res.status(400).json( budgetName );
     }
     res.json({ userId, budgetName });
   });
