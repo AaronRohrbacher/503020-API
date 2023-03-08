@@ -4,7 +4,6 @@ const CognitoExpress = require('cognito-express');
 const app = express();
 const AWS = require('aws-sdk');
 
-
 const IS_OFFLINE = process.env.IS_OFFLINE;
 
 let dynamoDb;
@@ -24,8 +23,6 @@ if (IS_OFFLINE === 'true') {
     tokenExpiration: 3600000, // Up to default expiration of 1 hour (3600000 ms)
   });
 };
-
-
 app.post('/', function(req, res) {
   const params = {
     TableName: process.env.BUDGETS_TABLE,
@@ -33,7 +30,6 @@ app.post('/', function(req, res) {
       budgetId: req.params.budgetId,
     },
   };
-
   dynamoDb.get(params, (error, result) => {
     if (error) {
       console.log(error);
@@ -47,7 +43,6 @@ app.post('/', function(req, res) {
     }
   });
 });
-
 app.post('/budgets', function(req, res) {
   const {userId, budgetName} = JSON.parse(req.apiGateway.event.body);
   if (typeof userId !== 'string') {
@@ -56,7 +51,6 @@ app.post('/budgets', function(req, res) {
   } else if (typeof budgetName !== 'string') {
     return res.status(400).json({error: '"name" must be a string'});
   }
-
   const params = {
     TableName: process.env.BUDGETS_TABLE,
     Item: {
@@ -64,7 +58,6 @@ app.post('/budgets', function(req, res) {
       budgetName: budgetName,
     },
   };
-
   dynamoDb.put(params, (error) => {
     if (error) {
       console.log(error);
@@ -73,6 +66,4 @@ app.post('/budgets', function(req, res) {
     res.json({userId, budgetName});
   });
 });
-
-
 module.exports.handler = serverless(app);
