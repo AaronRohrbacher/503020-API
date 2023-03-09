@@ -37,11 +37,10 @@ app.post('/userBudgets', function(req, res) {
   dynamoDb.query(params, (error, result) => {
     if (error) {
       console.log(error);
-      res.status(400).json( error );
+      res.status(400).json( 'FUCK' );
     }
     if (result) {
-      const {userId, budgetName} = result;
-      res.json(userId);
+      res.json(result);
     } else {
       res.status(404).json({error: 'budgets not found'});
     }
