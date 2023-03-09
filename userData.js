@@ -23,26 +23,31 @@ if (IS_OFFLINE === 'true') {
     tokenExpiration: 3600000, // Up to default expiration of 1 hour (3600000 ms)
   });
 };
-app.post('/', function(req, res) {
+
+app.post('/userBudgets', function(req, res) {
+  const {userId} = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGETS_TABLE,
-    Key: {
-      budgetId: req.params.budgetId,
+    KeyConditionExpression: 'userId = :userId',
+    ExpressionAttributeValues: {
+      ':userId': userId,
     },
   };
-  dynamoDb.get(params, (error, result) => {
+
+  dynamoDb.query(params, (error, result) => {
     if (error) {
       console.log(error);
-      res.status(400).json({error: 'Could not get budgets'});
+      res.status(400).json( error );
     }
-    if (result.Item) {
-      const {budgetName} = result.Item;
-      res.json({userId, budgetName});
+    if (result) {
+      const {userId, budgetName} = result;
+      res.json(userId);
     } else {
       res.status(404).json({error: 'budgets not found'});
     }
   });
 });
+
 app.post('/budgets', function(req, res) {
   const {userId, budgetName} = JSON.parse(req.apiGateway.event.body);
   if (typeof userId !== 'string') {
@@ -66,4 +71,5 @@ app.post('/budgets', function(req, res) {
     res.json({userId, budgetName});
   });
 });
+
 module.exports.handler = serverless(app);

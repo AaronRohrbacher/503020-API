@@ -82,6 +82,12 @@ functions:
       - http:
           path: /budgets
           method: post
+  userBudgets:
+    handler: userData.handler
+    events:
+      - http:
+          path: /userBudgets
+          method: post
 
 
 resources:
