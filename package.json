@@ -13,6 +13,7 @@
     "serverless-offline-local-authorizers-plugin": "^1.2.0"
   },
   "scripts": {
-    "lint": "eslint './**/*.js' --fix"
+    "lint": "eslint './**/*.js' --fix",
+    "fuck": "fucktown"
   }
 }
