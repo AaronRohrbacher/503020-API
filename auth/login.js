@@ -11,11 +11,11 @@ module.exports.handler = async (event) => {
     }
 
     const {email, password} = JSON.parse(event.body);
-    const {userPoolId, client_id} = process.env;
+    const {userPoolId, clientId} = process.env;
     const params = {
       AuthFlow: 'ADMIN_NO_SRP_AUTH',
       UserPoolId: userPoolId,
-      ClientId: client_id,
+      ClientId: clientId,
       AuthParameters: {
         USERNAME: email,
         PASSWORD: password,
