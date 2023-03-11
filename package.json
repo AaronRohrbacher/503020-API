@@ -13,6 +13,6 @@
     "serverless-offline-local-authorizers-plugin": "^1.2.0"
   },
   "scripts": {
-    "lint": "npm run eslint './**/*.js' --fix"
+    "lint": "yarn run eslint './**/*.js' --fix"
   }
 }
