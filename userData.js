@@ -3,7 +3,6 @@ const express = require('express');
 const CognitoExpress = require('cognito-express');
 const app = express();
 const AWS = require('aws-sdk');
-
 const IS_OFFLINE = process.env.IS_OFFLINE;
 
 let dynamoDb;

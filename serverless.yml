@@ -82,6 +82,20 @@ functions:
       - http:
           path: /budgets
           method: post
+          integration: lambda
+          authorizer:
+            name: 503020_authorizer
+            type: COGNITO_USER_POOLS
+            arn: 
+              Fn::GetAtt: 
+                - 503020UserPool 
+                - Arn
+            claims:
+              - email
+          localAuthorizer:
+            name: "mylocalAuthProxyFn"
+            type: "request"
+
   userBudgets:
     handler: userData.handler
     events:
