@@ -23,7 +23,7 @@ if (IS_OFFLINE === 'true') {
   });
 }
 
-app.post('/userBudgets', function(req, res) {
+app.post('/userBudgets', (req, res) => {
   console.log(dynamoDb);
   const {userId} = JSON.parse(req.apiGateway.event.body);
   const params = {
@@ -47,7 +47,7 @@ app.post('/userBudgets', function(req, res) {
   });
 });
 
-app.post('/budgets', function(req, res) {
+app.post('/budgets', (req, res) => {
   const {userId, budgetName} = JSON.parse(req.apiGateway.event.body);
   if (typeof userId !== 'string') {
     console.log(userId);
