@@ -37,7 +37,7 @@ app.post('/userBudgets', function(req, res) {
   dynamoDb.query(params, (error, result) => {
     if (error) {
       console.log(error);
-      res.status(400).json( 'FUCK' );
+      res.status(400).json( error );
     }
     if (result) {
       res.json(result);
