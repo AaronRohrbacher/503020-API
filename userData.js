@@ -12,6 +12,11 @@ if (IS_OFFLINE === 'true') {
     region: 'localhost',
     endpoint: 'http://localhost:8000',
   });
+  userData = {
+    email: 'offlineUser@offline.com',
+    firstName: 'Aaron',
+    lastName: 'Rohrbacher',
+  };
   console.log(dynamoDb);
 } else {
   dynamoDb = new AWS.DynamoDB.DocumentClient();
@@ -30,6 +35,10 @@ const totalBudget = (budgetItems) => {
   });
   return total;
 };
+
+app.post('/userData', (req, res) => {
+  res.json('FUQ');
+});
 
 app.post('/userBudgets', (req, res) => {
   console.log(dynamoDb);

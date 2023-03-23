@@ -61,9 +61,8 @@ functions:
     handler: userData.handler
     events:
       - http: 
-          path: /
+          path: /userData
           method: post
-          integration: lambda
           authorizer:
             name: 503020_authorizer
             type: COGNITO_USER_POOLS
@@ -176,14 +175,20 @@ resources:
             AttributeType: S
           - AttributeName: budgetId
             AttributeType: S
+          - AttributeName: dueDate
+            AttributeType: N
         KeySchema:
           - AttributeName: id
             KeyType: HASH
+          - AttributeName: dueDate
+            KeyType: RANGE
         GlobalSecondaryIndexes:
           - IndexName: budgetId
             KeySchema:
               - AttributeName: budgetId
                 KeyType: HASH
+              - AttributeName: dueDate
+                KeyType: RANGE
             Projection:
               ProjectionType: 'ALL'
             ProvisionedThroughput:
