@@ -37,7 +37,7 @@ const totalBudget = (budgetItems) => {
 };
 
 app.post('/userData', (req, res) => {
-  res.json('FUQ');
+  res.json(req.requestContext.authorizer.claims);
 });
 
 app.post('/userBudgets', (req, res) => {

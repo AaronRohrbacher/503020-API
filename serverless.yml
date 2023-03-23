@@ -51,6 +51,12 @@ provider:
     client_id: { Ref: 503020UserPoolClient }
 
 functions:
+  signup:
+    handler: auth/signup.handler
+    events:
+      - http:
+          path: /signup
+          method: post
   login:
     handler: auth/login.handler
     events:
@@ -184,7 +190,7 @@ resources:
             KeyType: RANGE
         GlobalSecondaryIndexes:
           - IndexName: budgetId
-            KeySchema:
+            KeySchema:  
               - AttributeName: budgetId
                 KeyType: HASH
               - AttributeName: dueDate
