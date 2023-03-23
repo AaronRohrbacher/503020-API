@@ -82,7 +82,6 @@ functions:
       - http:
           path: /budgets
           method: post
-          integration: lambda
           authorizer:
             name: 503020_authorizer
             type: COGNITO_USER_POOLS
@@ -113,7 +112,42 @@ functions:
           localAuthorizer:
             name: "mylocalAuthProxyFn"
             type: "request"
-
+  budgetItems:
+    handler: userData.handler
+    events:
+      - http:
+          path: /budgetItems
+          method: post
+          authorizer:
+            name: 503020_authorizer
+            type: COGNITO_USER_POOLS
+            arn: 
+              Fn::GetAtt: 
+                - 503020UserPool 
+                - Arn
+            claims:
+              - email
+          localAuthorizer:
+            name: "mylocalAuthProxyFn"
+            type: "request"
+  budgetItem:
+    handler: userData.handler
+    events:
+      - http:
+          path: /budgetItem
+          method: post
+          authorizer:
+            name: 503020_authorizer
+            type: COGNITO_USER_POOLS
+            arn: 
+              Fn::GetAtt: 
+                - 503020UserPool 
+                - Arn
+            claims:
+              - email
+          localAuthorizer:
+            name: "mylocalAuthProxyFn"
+            type: "request"
 
 resources:
   Resources:
@@ -138,11 +172,23 @@ resources:
       Type: "AWS::DynamoDB::Table"
       Properties:
         AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
           - AttributeName: budgetId
             AttributeType: S
         KeySchema:
-          - AttributeName: budgetId
+          - AttributeName: id
             KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: budgetId
+            KeySchema:
+              - AttributeName: budgetId
+                KeyType: HASH
+            Projection:
+              ProjectionType: 'ALL'
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1       
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1

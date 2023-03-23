@@ -23,6 +23,14 @@ if (IS_OFFLINE === 'true') {
   });
 }
 
+const totalBudget = (budgetItems) => {
+  let total = 0;
+  budgetItems.forEach((item) => {
+    total += item.cost;
+  });
+  return total;
+};
+
 app.post('/userBudgets', (req, res) => {
   console.log(dynamoDb);
   const {userId} = JSON.parse(req.apiGateway.event.body);
@@ -37,7 +45,7 @@ app.post('/userBudgets', (req, res) => {
   dynamoDb.query(params, (error, result) => {
     if (error) {
       console.log(error);
-      res.status(400).json( error );
+      res.status(400).json(error);
     }
     if (result) {
       res.json(result);
@@ -65,9 +73,49 @@ app.post('/budgets', (req, res) => {
   dynamoDb.put(params, (error) => {
     if (error) {
       console.log(error);
-      return res.status(400).json( budgetName );
+      return res.status(400).json(error);
     }
     res.json({userId, budgetName});
+  });
+});
+
+app.post('/budgetItem', (req, res) => {
+  const {budgetId, name, cost, dueDate} = JSON.parse(req.apiGateway.event.body);
+  const params = {
+    TableName: process.env.BUDGET_ITEMS_TABLE,
+    Item: {
+      id: (Date.now() + Math.random()).toString(),
+      budgetId: budgetId,
+      name: name,
+      cost: cost,
+      dueDate: dueDate,
+    },
+  };
+  dynamoDb.put(params, (error) => {
+    if (error) {
+      console.log(error);
+      return res.status(400).json(error);
+    }
+    res.json(params);
+  });
+});
+
+app.post('/budgetItems', (req, res) => {
+  const {budgetId} = JSON.parse(req.apiGateway.event.body);
+  const params = {
+    TableName: process.env.BUDGET_ITEMS_TABLE,
+    IndexName: 'budgetId',
+    KeyConditionExpression: 'budgetId = :budgetId',
+    ExpressionAttributeValues: {
+      ':budgetId': budgetId,
+    },
+  };
+  dynamoDb.query(params, (error, result) => {
+    response = {
+      BudgetItems: result.Items,
+      budgetTotal: totalBudget(result.Items),
+    };
+    return res.json(response);
   });
 });
 
