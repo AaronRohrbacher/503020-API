@@ -51,6 +51,12 @@ provider:
     client_id: { Ref: 503020UserPoolClient }
 
 functions:
+  signup:
+    handler: auth/signup.handler
+    events:
+      - http:
+          path: /signup
+          method: post
   login:
     handler: auth/login.handler
     events:
@@ -61,9 +67,8 @@ functions:
     handler: userData.handler
     events:
       - http: 
-          path: /
+          path: /userData
           method: post
-          integration: lambda
           authorizer:
             name: 503020_authorizer
             type: COGNITO_USER_POOLS
@@ -155,15 +160,30 @@ resources:
       Type: "AWS::DynamoDB::Table"
       Properties:
         AttributeDefinitions:
-          - AttributeName: userId
+          - AttributeName: id
             AttributeType: S
           - AttributeName: budgetName
             AttributeType: S
-        KeySchema:
           - AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
             KeyType: HASH
           - AttributeName: budgetName
             KeyType: RANGE
+        GlobalSecondaryIndexes:
+          - IndexName: userId
+            KeySchema:  
+              - AttributeName: userId
+                KeyType: HASH
+              - AttributeName: budgetName
+                KeyType: RANGE
+            Projection:
+              ProjectionType: 'ALL'
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1       
+
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1       
@@ -176,14 +196,20 @@ resources:
             AttributeType: S
           - AttributeName: budgetId
             AttributeType: S
+          - AttributeName: dueDate
+            AttributeType: N
         KeySchema:
           - AttributeName: id
             KeyType: HASH
+          - AttributeName: dueDate
+            KeyType: RANGE
         GlobalSecondaryIndexes:
           - IndexName: budgetId
-            KeySchema:
+            KeySchema:  
               - AttributeName: budgetId
                 KeyType: HASH
+              - AttributeName: dueDate
+                KeyType: RANGE
             Projection:
               ProjectionType: 'ALL'
             ProvisionedThroughput:

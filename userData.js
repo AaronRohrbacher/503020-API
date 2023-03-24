@@ -12,6 +12,11 @@ if (IS_OFFLINE === 'true') {
     region: 'localhost',
     endpoint: 'http://localhost:8000',
   });
+  userData = {
+    email: 'offlineUser@offline.com',
+    firstName: 'Aaron',
+    lastName: 'Rohrbacher',
+  };
   console.log(dynamoDb);
 } else {
   dynamoDb = new AWS.DynamoDB.DocumentClient();
@@ -31,17 +36,21 @@ const totalBudget = (budgetItems) => {
   return total;
 };
 
+app.post('/userData', (req, res) => {
+  res.json(req.requestContext.authorizer.claims);
+});
+
 app.post('/userBudgets', (req, res) => {
   console.log(dynamoDb);
   const {userId} = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGETS_TABLE,
+    IndexName: 'userId',
     KeyConditionExpression: 'userId = :userId',
     ExpressionAttributeValues: {
       ':userId': userId,
     },
   };
-
   dynamoDb.query(params, (error, result) => {
     if (error) {
       console.log(error);
@@ -57,15 +66,10 @@ app.post('/userBudgets', (req, res) => {
 
 app.post('/budgets', (req, res) => {
   const {userId, budgetName} = JSON.parse(req.apiGateway.event.body);
-  if (typeof userId !== 'string') {
-    console.log(userId);
-    return res.status(400).json({error: '"userId" must be a string'});
-  } else if (typeof budgetName !== 'string') {
-    return res.status(400).json({error: '"name" must be a string'});
-  }
   const params = {
     TableName: process.env.BUDGETS_TABLE,
     Item: {
+      id: (Date.now() + Math.random()).toString(),
       userId: userId,
       budgetName: budgetName,
     },
