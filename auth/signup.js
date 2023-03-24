@@ -22,7 +22,7 @@ module.exports.handler = async (event) => {
         },
         {
           Name: 'custom:firstName',
-          Value: 'Aaron',
+          Value: firstName,
         },
         {
           Name: 'email_verified',
