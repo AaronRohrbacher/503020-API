@@ -10,7 +10,7 @@ module.exports.handler = async (event) => {
       return sendResponse(400, {message: 'Invalid input'});
     }
 
-    const {email, password} = JSON.parse(event.body);
+    const {email, password, firstName} = JSON.parse(event.body);
     const {user_pool_id} = process.env;
     const params = {
       UserPoolId: user_pool_id,
@@ -19,6 +19,10 @@ module.exports.handler = async (event) => {
         {
           Name: 'email',
           Value: email,
+        },
+        {
+          Name: 'custom:firstName',
+          Value: 'Aaron',
         },
         {
           Name: 'email_verified',

@@ -78,6 +78,7 @@ functions:
                 - Arn
             claims:
               - email
+              - firstName
           localAuthorizer:
             name: "mylocalAuthProxyFn"
             type: "request"
