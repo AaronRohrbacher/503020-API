@@ -45,12 +45,12 @@ app.post('/userBudgets', (req, res) => {
   const {userId} = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGETS_TABLE,
+    IndexName: 'userId',
     KeyConditionExpression: 'userId = :userId',
     ExpressionAttributeValues: {
       ':userId': userId,
     },
   };
-
   dynamoDb.query(params, (error, result) => {
     if (error) {
       console.log(error);
@@ -66,15 +66,10 @@ app.post('/userBudgets', (req, res) => {
 
 app.post('/budgets', (req, res) => {
   const {userId, budgetName} = JSON.parse(req.apiGateway.event.body);
-  if (typeof userId !== 'string') {
-    console.log(userId);
-    return res.status(400).json({error: '"userId" must be a string'});
-  } else if (typeof budgetName !== 'string') {
-    return res.status(400).json({error: '"name" must be a string'});
-  }
   const params = {
     TableName: process.env.BUDGETS_TABLE,
     Item: {
+      id: (Date.now() + Math.random()).toString(),
       userId: userId,
       budgetName: budgetName,
     },

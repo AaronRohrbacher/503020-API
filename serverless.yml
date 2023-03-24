@@ -160,15 +160,30 @@ resources:
       Type: "AWS::DynamoDB::Table"
       Properties:
         AttributeDefinitions:
-          - AttributeName: userId
+          - AttributeName: id
             AttributeType: S
           - AttributeName: budgetName
             AttributeType: S
-        KeySchema:
           - AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
             KeyType: HASH
           - AttributeName: budgetName
             KeyType: RANGE
+        GlobalSecondaryIndexes:
+          - IndexName: userId
+            KeySchema:  
+              - AttributeName: userId
+                KeyType: HASH
+              - AttributeName: budgetName
+                KeyType: RANGE
+            Projection:
+              ProjectionType: 'ALL'
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1       
+
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1       
