@@ -12,11 +12,11 @@ if (IS_OFFLINE === 'true') {
     region: 'localhost',
     endpoint: 'http://localhost:8000',
   });
-  userData = {
-    email: 'offlineUser@offline.com',
-    firstName: 'Aaron',
-    lastName: 'Rohrbacher',
-  };
+  // const userData = {
+  //   email: 'offlineUser@offline.com',
+  //   firstName: 'Aaron',
+  //   lastName: 'Rohrbacher',
+  // };
 } else {
   dynamoDb = new AWS.DynamoDB.DocumentClient();
   cognitoExpress = new CognitoExpress({
@@ -64,6 +64,7 @@ app.post('/userBudgets', (req, res) => {
 });
 
 app.post('/budgets', (req, res) => {
+  return "hello"
   const {userId, budgetName} = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGETS_TABLE,
