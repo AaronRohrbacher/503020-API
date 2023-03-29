@@ -17,7 +17,6 @@ if (IS_OFFLINE === 'true') {
     firstName: 'Aaron',
     lastName: 'Rohrbacher',
   };
-  console.log(dynamoDb);
 } else {
   dynamoDb = new AWS.DynamoDB.DocumentClient();
   cognitoExpress = new CognitoExpress({
