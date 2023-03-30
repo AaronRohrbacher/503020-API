@@ -8,4 +8,11 @@ describe('POST userBudgets:', () => {
       expect(response.body.Items[0]).to.have.property('budgetName', 'Happy Budget');
     });
   });
+  afterEach(() => {
+    cy.request('POST', '/userBudgets', {userId: '1a'}).then((response) => {
+      response.body.Items.forEach((budget) => {
+        cy.request('DELETE', '/deleteBudget', {id: budget.id, budgetName: budget.budgetName});
+      });
+    });
+  });
 });
