@@ -64,7 +64,6 @@ app.post('/userBudgets', (req, res) => {
 });
 
 app.post('/budgets', (req, res) => {
-  return "hello"
   const {userId, budgetName} = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGETS_TABLE,
@@ -82,6 +81,23 @@ app.post('/budgets', (req, res) => {
     res.json({userId, budgetName});
   });
 });
+
+app.delete('/deleteBudget', (req, res) => {
+  const {budgetId} = JSON.parse(req.apiGateway.event.body);
+  const params = {
+    TableName: process.env.BUDGETS_TABLE,
+    Item: {
+      id: budgetId
+    },
+  };
+  dynamoDb.delete(params, (error) => {
+    if (error) {
+      console.log(error);
+      return res.status(400).json(error);
+    }
+    res.json(params);
+  })
+})
 
 app.post('/budgetItem', (req, res) => {
   const {budgetId, name, cost, dueDate} = JSON.parse(req.apiGateway.event.body);
