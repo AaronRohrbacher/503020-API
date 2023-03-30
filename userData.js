@@ -12,12 +12,11 @@ if (IS_OFFLINE === 'true') {
     region: 'localhost',
     endpoint: 'http://localhost:8000',
   });
-  userData = {
-    email: 'offlineUser@offline.com',
-    firstName: 'Aaron',
-    lastName: 'Rohrbacher',
-  };
-  console.log(dynamoDb);
+  // const userData = {
+  //   email: 'offlineUser@offline.com',
+  //   firstName: 'Aaron',
+  //   lastName: 'Rohrbacher',
+  // };
 } else {
   dynamoDb = new AWS.DynamoDB.DocumentClient();
   cognitoExpress = new CognitoExpress({
@@ -66,10 +65,11 @@ app.post('/userBudgets', (req, res) => {
 
 app.post('/budgets', (req, res) => {
   const {userId, budgetName} = JSON.parse(req.apiGateway.event.body);
+  const id = (Date.now() + Math.random()).toString();
   const params = {
     TableName: process.env.BUDGETS_TABLE,
     Item: {
-      id: (Date.now() + Math.random()).toString(),
+      id: id,
       userId: userId,
       budgetName: budgetName,
     },
@@ -79,7 +79,25 @@ app.post('/budgets', (req, res) => {
       console.log(error);
       return res.status(400).json(error);
     }
-    res.json({userId, budgetName});
+    res.json({userId, budgetName, id});
+  });
+});
+
+app.delete('/deleteBudget', (req, res) => {
+  const {id, budgetName} = JSON.parse(req.apiGateway.event.body);
+  const params = {
+    Key: {
+      id: id,
+      budgetName: budgetName,
+    },
+    TableName: process.env.BUDGETS_TABLE,
+  };
+  dynamoDb.delete(params, (error) => {
+    if (error) {
+      console.log(error);
+      return res.status(400).json(error);
+    }
+    res.json(params);
   });
 });
 

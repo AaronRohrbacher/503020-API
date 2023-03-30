@@ -42,8 +42,19 @@ provider:
         - cognito-idp:AdminSetUserPassword
       Resource:
         - { "Fn::GetAtt": ["BudgetsDynamoDBTable", "Arn"] }
+        - Fn::Join:
+            - "/"
+            - 
+              - { "Fn::GetAtt": ["BudgetsDynamoDBTable", "Arn"] }
+              - "index/*"
         - { "Fn::GetAtt": ["BudgetItemsDynamoDBTable", "Arn"] }
+        - Fn::Join:
+            - "/"
+            - 
+              - { "Fn::GetAtt": ["BudgetItemsDynamoDBTable", "Arn"] }
+              - "index/*"
         - { "Fn::GetAtt": ["503020UserPool", "Arn"] }
+
   environment:
     BUDGETS_TABLE: ${self:custom.budgetsTableName}
     BUDGET_ITEMS_TABLE: ${self:custom.budgetItemsTableName}
@@ -66,15 +77,15 @@ functions:
   userData:
     handler: userData.handler
     events:
-      - http: 
+      - http:
           path: /userData
           method: post
           authorizer:
             name: 503020_authorizer
             type: COGNITO_USER_POOLS
-            arn: 
-              Fn::GetAtt: 
-                - 503020UserPool 
+            arn:
+              Fn::GetAtt:
+                - 503020UserPool
                 - Arn
             claims:
               - email
@@ -90,15 +101,34 @@ functions:
           authorizer:
             name: 503020_authorizer
             type: COGNITO_USER_POOLS
-            arn: 
-              Fn::GetAtt: 
-                - 503020UserPool 
+            arn:
+              Fn::GetAtt:
+                - 503020UserPool
                 - Arn
             claims:
               - email
           localAuthorizer:
             name: "mylocalAuthProxyFn"
             type: "request"
+  deleteBudget:
+    handler: userData.handler
+    events:
+      - http:
+          path: /deleteBudget
+          method: delete
+          authorizer:
+            name: 503020_authorizer
+            type: COGNITO_USER_POOLS
+            arn:
+              Fn::GetAtt:
+                - 503020UserPool
+                - Arn
+            claims:
+              - email
+          localAuthorizer:
+            name: "mylocalAuthProxyFn"
+            type: "request"
+
   userBudgets:
     handler: userData.handler
     events:
@@ -108,9 +138,9 @@ functions:
           authorizer:
             name: 503020_authorizer
             type: COGNITO_USER_POOLS
-            arn: 
-              Fn::GetAtt: 
-                - 503020UserPool 
+            arn:
+              Fn::GetAtt:
+                - 503020UserPool
                 - Arn
             claims:
               - email
@@ -126,9 +156,9 @@ functions:
           authorizer:
             name: 503020_authorizer
             type: COGNITO_USER_POOLS
-            arn: 
-              Fn::GetAtt: 
-                - 503020UserPool 
+            arn:
+              Fn::GetAtt:
+                - 503020UserPool
                 - Arn
             claims:
               - email
@@ -144,9 +174,9 @@ functions:
           authorizer:
             name: 503020_authorizer
             type: COGNITO_USER_POOLS
-            arn: 
-              Fn::GetAtt: 
-                - 503020UserPool 
+            arn:
+              Fn::GetAtt:
+                - 503020UserPool
                 - Arn
             claims:
               - email
@@ -173,20 +203,20 @@ resources:
             KeyType: RANGE
         GlobalSecondaryIndexes:
           - IndexName: userId
-            KeySchema:  
+            KeySchema:
               - AttributeName: userId
                 KeyType: HASH
               - AttributeName: budgetName
                 KeyType: RANGE
             Projection:
-              ProjectionType: 'ALL'
+              ProjectionType: "ALL"
             ProvisionedThroughput:
               ReadCapacityUnits: 1
-              WriteCapacityUnits: 1       
+              WriteCapacityUnits: 1
 
         ProvisionedThroughput:
           ReadCapacityUnits: 1
-          WriteCapacityUnits: 1       
+          WriteCapacityUnits: 1
         TableName: ${self:custom.budgetsTableName}
     BudgetItemsDynamoDBTable:
       Type: "AWS::DynamoDB::Table"
@@ -205,16 +235,16 @@ resources:
             KeyType: RANGE
         GlobalSecondaryIndexes:
           - IndexName: budgetId
-            KeySchema:  
+            KeySchema:
               - AttributeName: budgetId
                 KeyType: HASH
               - AttributeName: dueDate
                 KeyType: RANGE
             Projection:
-              ProjectionType: 'ALL'
+              ProjectionType: "ALL"
             ProvisionedThroughput:
               ReadCapacityUnits: 1
-              WriteCapacityUnits: 1       
+              WriteCapacityUnits: 1
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
@@ -245,4 +275,3 @@ resources:
         IdTokenValidity: 5
         ExplicitAuthFlows:
           - ADMIN_NO_SRP_AUTH
-
