@@ -3,6 +3,7 @@ const express = require('express');
 const app = express();
 const CognitoExpress = require('cognito-express');
 const AWS = require('aws-sdk');
+const moment = require('moment');
 const IS_OFFLINE = process.env.IS_OFFLINE;
 
 let dynamoDb;
@@ -33,6 +34,39 @@ const totalBudget = (budgetItems) => {
     total += item.cost;
   });
   return total;
+};
+
+const totalByPayPeriod = (budgetItems) => {
+  let pre15Total = 0;
+  let post15Total = 0;
+  budgetItems.forEach((item) => {
+    if (item.dueDate < 15) {
+      pre15Total += item.cost;
+    } else {
+      post15Total += item.cost;
+    }
+  });
+  return {
+    pre15Total: pre15Total,
+    post15Total: post15Total,
+  };
+};
+
+const getCurrentMonth = () => {
+  const month = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  return month[new Date().getMonth()];
+};
+
+const numberOfDaysUntilNextPay = () => {
+  if (moment().date() < 15) {
+    const the15th = moment([moment().year(), moment().month(), 15]);
+    const currentDate = moment([moment().year(), moment().month(), moment().date()]);
+    return the15th.diff(currentDate, 'days');
+  } else {
+    const lastDayOfTheMonth = moment(moment().endOf('month'));
+    const currentDate = moment([moment().year(), moment().month(), moment().date()]);
+    return lastDayOfTheMonth.diff(currentDate, 'days');
+  }
 };
 
 app.post('/userData', (req, res) => {
@@ -136,6 +170,9 @@ app.post('/budgetItems', (req, res) => {
     response = {
       BudgetItems: result.Items,
       budgetTotal: totalBudget(result.Items),
+      totalByPayPeriod: totalByPayPeriod(result.Items),
+      currentMonth: getCurrentMonth(),
+      numberOfDaysUntilNextPay: numberOfDaysUntilNextPay(),
     };
     return res.json(response);
   });
