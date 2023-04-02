@@ -213,7 +213,6 @@ resources:
             ProvisionedThroughput:
               ReadCapacityUnits: 1
               WriteCapacityUnits: 1
-
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
@@ -226,20 +225,14 @@ resources:
             AttributeType: S
           - AttributeName: budgetId
             AttributeType: S
-          - AttributeName: dueDate
-            AttributeType: N
         KeySchema:
           - AttributeName: id
             KeyType: HASH
-          - AttributeName: dueDate
-            KeyType: RANGE
         GlobalSecondaryIndexes:
           - IndexName: budgetId
             KeySchema:
               - AttributeName: budgetId
                 KeyType: HASH
-              - AttributeName: dueDate
-                KeyType: RANGE
             Projection:
               ProjectionType: "ALL"
             ProvisionedThroughput:

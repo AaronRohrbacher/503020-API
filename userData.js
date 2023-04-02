@@ -13,11 +13,6 @@ if (IS_OFFLINE === 'true') {
     region: 'localhost',
     endpoint: 'http://localhost:8000',
   });
-  // const userData = {
-  //   email: 'offlineUser@offline.com',
-  //   firstName: 'Aaron',
-  //   lastName: 'Rohrbacher',
-  // };
 } else {
   dynamoDb = new AWS.DynamoDB.DocumentClient();
   cognitoExpress = new CognitoExpress({
@@ -65,8 +60,20 @@ const numberOfDaysUntilNextPay = () => {
   } else {
     const lastDayOfTheMonth = moment(moment().endOf('month'));
     const currentDate = moment([moment().year(), moment().month(), moment().date()]);
-    return lastDayOfTheMonth.diff(currentDate, 'days');
+    return lastDayOfTheMonth.diff(currentDate, 'days') + 1;
   }
+};
+
+const currentBalance = (budgetItems) => {
+  let id = 0;
+  let balance;
+  budgetItems.forEach((item) => {
+    if (item.balance && item.id > id) {
+      id = item.id;
+      balance = item.balance;
+    }
+  });
+  return balance;
 };
 
 app.post('/userData', (req, res) => {
@@ -98,7 +105,7 @@ app.post('/userBudgets', (req, res) => {
 });
 
 app.post('/budgets', (req, res) => {
-  const {userId, budgetName} = JSON.parse(req.apiGateway.event.body);
+  const {userId, budgetName, currentBankBalance} = JSON.parse(req.apiGateway.event.body);
   const id = (Date.now() + Math.random()).toString();
   const params = {
     TableName: process.env.BUDGETS_TABLE,
@@ -106,6 +113,7 @@ app.post('/budgets', (req, res) => {
       id: id,
       userId: userId,
       budgetName: budgetName,
+      currentBankBalance: currentBankBalance,
     },
   };
   dynamoDb.put(params, (error) => {
@@ -113,7 +121,7 @@ app.post('/budgets', (req, res) => {
       console.log(error);
       return res.status(400).json(error);
     }
-    res.json({userId, budgetName, id});
+    res.json({params});
   });
 });
 
@@ -136,7 +144,7 @@ app.delete('/deleteBudget', (req, res) => {
 });
 
 app.post('/budgetItem', (req, res) => {
-  const {budgetId, name, cost, dueDate} = JSON.parse(req.apiGateway.event.body);
+  const {budgetId, name, cost, dueDate, balance} = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
     Item: {
@@ -145,6 +153,7 @@ app.post('/budgetItem', (req, res) => {
       name: name,
       cost: cost,
       dueDate: dueDate,
+      balance: balance,
     },
   };
   dynamoDb.put(params, (error) => {
@@ -158,6 +167,7 @@ app.post('/budgetItem', (req, res) => {
 
 app.post('/budgetItems', (req, res) => {
   const {budgetId} = JSON.parse(req.apiGateway.event.body);
+
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
     IndexName: 'budgetId',
@@ -166,6 +176,7 @@ app.post('/budgetItems', (req, res) => {
       ':budgetId': budgetId,
     },
   };
+
   dynamoDb.query(params, (error, result) => {
     response = {
       BudgetItems: result.Items,
@@ -173,6 +184,8 @@ app.post('/budgetItems', (req, res) => {
       totalByPayPeriod: totalByPayPeriod(result.Items),
       currentMonth: getCurrentMonth(),
       numberOfDaysUntilNextPay: numberOfDaysUntilNextPay(),
+      currentBalance: currentBalance(result.Items),
+      dailyBudget: currentBalance(result.Items)/numberOfDaysUntilNextPay(),
     };
     return res.json(response);
   });
