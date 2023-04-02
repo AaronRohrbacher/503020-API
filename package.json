@@ -24,6 +24,6 @@
   },
   "scripts": {
     "lint": "eslint './**/*.js' --fix",
-    "test": "concurrently -n 'server,cypress' -k 'sls offline start' 'npx cypress run'"
+    "test": "npx cypress run"
   }
 }

@@ -183,6 +183,62 @@ functions:
           localAuthorizer:
             name: "mylocalAuthProxyFn"
             type: "request"
+  udpateBudgetItem:
+    handler: userData.handler
+    events:
+      - http:
+          path: /updateBudgetItem
+          method: post
+          authorizer:
+            name: 503020_authorizer
+            type: COGNITO_USER_POOLS
+            arn:
+              Fn::GetAtt:
+                - 503020UserPool
+                - Arn
+            claims:
+              - email
+          localAuthorizer:
+            name: "mylocalAuthProxyFn"
+            type: "request"
+  deleteBudgetItem:
+    handler: userData.handler
+    events:
+      - http:
+          path: /deleteBudgetItem
+          method: delete
+          authorizer:
+            name: 503020_authorizer
+            type: COGNITO_USER_POOLS
+            arn:
+              Fn::GetAtt:
+                - 503020UserPool
+                - Arn
+            claims:
+              - email
+          localAuthorizer:
+            name: "mylocalAuthProxyFn"
+            type: "request"
+  updateBudget:
+    handler: userData.handler
+    events:
+      - http:
+          path: /updateBudget
+          method: post
+          authorizer:
+            name: 503020_authorizer
+            type: COGNITO_USER_POOLS
+            arn:
+              Fn::GetAtt:
+                - 503020UserPool
+                - Arn
+            claims:
+              - email
+          localAuthorizer:
+            name: "mylocalAuthProxyFn"
+            type: "request"
+
+
 
 resources:
   Resources:
@@ -199,8 +255,6 @@ resources:
         KeySchema:
           - AttributeName: id
             KeyType: HASH
-          - AttributeName: budgetName
-            KeyType: RANGE
         GlobalSecondaryIndexes:
           - IndexName: userId
             KeySchema:
