@@ -1,10 +1,8 @@
 service: fifty-thirty-twenty
-
 plugins:
   - serverless-offline
   - serverless-dynamodb-local
   - serverless-offline-local-authorizers-plugin
-
 custom:
   budgetsTableName: "budgets-${self:provider.stage}"
   budgetItemsTableName: "budget-items-${self:provider.stage}"
@@ -22,7 +20,6 @@ custom:
   serverless-offline:
     noPrependStageInUrl: true
     reloadHandler: true
-
 provider:
   name: aws
   runtime: nodejs18.x
@@ -54,7 +51,6 @@ provider:
               - { "Fn::GetAtt": ["BudgetItemsDynamoDBTable", "Arn"] }
               - "index/*"
         - { "Fn::GetAtt": ["503020UserPool", "Arn"] }
-
   environment:
     BUDGETS_TABLE: ${self:custom.budgetsTableName}
     BUDGET_ITEMS_TABLE: ${self:custom.budgetItemsTableName}
@@ -92,11 +88,47 @@ functions:
           localAuthorizer:
             name: "mylocalAuthProxyFn"
             type: "request"
-  budgets:
+  createBudget:
     handler: userData.handler
     events:
       - http:
-          path: /budgets
+          path: /createBudget
+          method: post
+          authorizer:
+            name: 503020_authorizer
+            type: COGNITO_USER_POOLS
+            arn:
+              Fn::GetAtt:
+                - 503020UserPool
+                - Arn
+            claims:
+              - email
+          localAuthorizer:
+            name: "mylocalAuthProxyFn"
+            type: "request"
+  readBudgets:
+    handler: userData.handler
+    events:
+      - http:
+          path: /readBudgets
+          method: post
+          authorizer:
+            name: 503020_authorizer
+            type: COGNITO_USER_POOLS
+            arn:
+              Fn::GetAtt:
+                - 503020UserPool
+                - Arn
+            claims:
+              - email
+          localAuthorizer:
+            name: "mylocalAuthProxyFn"
+            type: "request"
+  updateBudget:
+    handler: userData.handler
+    events:
+      - http:
+          path: /updateBudget
           method: post
           authorizer:
             name: 503020_authorizer
@@ -128,12 +160,11 @@ functions:
           localAuthorizer:
             name: "mylocalAuthProxyFn"
             type: "request"
-
-  userBudgets:
+  createBudgetItem:
     handler: userData.handler
     events:
       - http:
-          path: /userBudgets
+          path: /createBudgetItem
           method: post
           authorizer:
             name: 503020_authorizer
@@ -147,29 +178,11 @@ functions:
           localAuthorizer:
             name: "mylocalAuthProxyFn"
             type: "request"
-  budgetItems:
+  readBudgetItems:
     handler: userData.handler
     events:
       - http:
-          path: /budgetItems
-          method: post
-          authorizer:
-            name: 503020_authorizer
-            type: COGNITO_USER_POOLS
-            arn:
-              Fn::GetAtt:
-                - 503020UserPool
-                - Arn
-            claims:
-              - email
-          localAuthorizer:
-            name: "mylocalAuthProxyFn"
-            type: "request"
-  budgetItem:
-    handler: userData.handler
-    events:
-      - http:
-          path: /budgetItem
+          path: /readBudgetItems
           method: post
           authorizer:
             name: 503020_authorizer
@@ -219,27 +232,6 @@ functions:
           localAuthorizer:
             name: "mylocalAuthProxyFn"
             type: "request"
-  updateBudget:
-    handler: userData.handler
-    events:
-      - http:
-          path: /updateBudget
-          method: post
-          authorizer:
-            name: 503020_authorizer
-            type: COGNITO_USER_POOLS
-            arn:
-              Fn::GetAtt:
-                - 503020UserPool
-                - Arn
-            claims:
-              - email
-          localAuthorizer:
-            name: "mylocalAuthProxyFn"
-            type: "request"
-
-
-
 resources:
   Resources:
     BudgetsDynamoDBTable:
