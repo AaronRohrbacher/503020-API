@@ -80,6 +80,27 @@ app.post('/userData', (req, res) => {
   res.json(req.requestContext.authorizer.claims);
 });
 
+app.post('/budgets', (req, res) => {
+  const {userId, budgetName, currentBankBalance} = JSON.parse(req.apiGateway.event.body);
+  const id = (Date.now() + Math.random()).toString();
+  const params = {
+    TableName: process.env.BUDGETS_TABLE,
+    Item: {
+      id: id,
+      userId: userId,
+      budgetName: budgetName,
+      currentBankBalance: currentBankBalance,
+    },
+  };
+  dynamoDb.put(params, (error) => {
+    if (error) {
+      console.log(error);
+      return res.status(400).json(error);
+    }
+    res.json({params});
+  });
+});
+
 app.post('/userBudgets', (req, res) => {
   console.log(dynamoDb);
   const {userId} = JSON.parse(req.apiGateway.event.body);
@@ -104,16 +125,19 @@ app.post('/userBudgets', (req, res) => {
   });
 });
 
-app.post('/budgets', (req, res) => {
-  const {userId, budgetName, currentBankBalance} = JSON.parse(req.apiGateway.event.body);
-  const id = (Date.now() + Math.random()).toString();
+app.post('/updateBudget', (req, res) => {
+  const {id, userId, budgetName} = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGETS_TABLE,
+    // UpdateExpression : "SET",
+    Key: {
+      id: id,
+    },
     Item: {
       id: id,
       userId: userId,
       budgetName: budgetName,
-      currentBankBalance: currentBankBalance,
+
     },
   };
   dynamoDb.put(params, (error) => {
@@ -121,7 +145,7 @@ app.post('/budgets', (req, res) => {
       console.log(error);
       return res.status(400).json(error);
     }
-    res.json({params});
+    res.json(params);
   });
 });
 
@@ -157,6 +181,49 @@ app.post('/budgetItem', (req, res) => {
     },
   };
   dynamoDb.put(params, (error) => {
+    if (error) {
+      console.log(error);
+      return res.status(400).json(error);
+    }
+    res.json(params);
+  });
+});
+
+app.post('/updateBudgetItem', (req, res) => {
+  const {id, budgetId, name, cost, dueDate, balance} = JSON.parse(req.apiGateway.event.body);
+  const params = {
+    TableName: process.env.BUDGET_ITEMS_TABLE,
+    // UpdateExpression : "SET",
+    Key: {
+      id: id,
+    },
+    Item: {
+      id: id,
+      budgetId: budgetId,
+      name: name,
+      cost: cost,
+      dueDate: dueDate,
+      balance: balance,
+    },
+  };
+  dynamoDb.put(params, (error) => {
+    if (error) {
+      console.log(error);
+      return res.status(400).json(error);
+    }
+    res.json(params);
+  });
+});
+
+app.delete('/deleteBudgetItem', (req, res) => {
+  const {id} = JSON.parse(req.apiGateway.event.body);
+  const params = {
+    Key: {
+      id: id,
+    },
+    TableName: process.env.BUDGET_ITEMS_TABLE,
+  };
+  dynamoDb.delete(params, (error) => {
     if (error) {
       console.log(error);
       return res.status(400).json(error);
