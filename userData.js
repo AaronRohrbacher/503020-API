@@ -80,7 +80,7 @@ app.post('/userData', (req, res) => {
   res.json(req.requestContext.authorizer.claims);
 });
 
-app.post('/budgets', (req, res) => {
+app.post('/createBudget', (req, res) => {
   const {userId, budgetName, currentBankBalance} = JSON.parse(req.apiGateway.event.body);
   const id = (Date.now() + Math.random()).toString();
   const params = {
@@ -101,7 +101,7 @@ app.post('/budgets', (req, res) => {
   });
 });
 
-app.post('/userBudgets', (req, res) => {
+app.post('/readBudgets', (req, res) => {
   console.log(dynamoDb);
   const {userId} = JSON.parse(req.apiGateway.event.body);
   const params = {
@@ -167,7 +167,7 @@ app.delete('/deleteBudget', (req, res) => {
   });
 });
 
-app.post('/budgetItem', (req, res) => {
+app.post('/createBudgetItem', (req, res) => {
   const {budgetId, name, cost, dueDate, balance} = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
@@ -188,6 +188,33 @@ app.post('/budgetItem', (req, res) => {
     res.json(params);
   });
 });
+
+app.post('/readBudgetItems', (req, res) => {
+  const {budgetId} = JSON.parse(req.apiGateway.event.body);
+
+  const params = {
+    TableName: process.env.BUDGET_ITEMS_TABLE,
+    IndexName: 'budgetId',
+    KeyConditionExpression: 'budgetId = :budgetId',
+    ExpressionAttributeValues: {
+      ':budgetId': budgetId,
+    },
+  };
+
+  dynamoDb.query(params, (error, result) => {
+    response = {
+      BudgetItems: result.Items,
+      budgetTotal: totalBudget(result.Items),
+      totalByPayPeriod: totalByPayPeriod(result.Items),
+      currentMonth: getCurrentMonth(),
+      numberOfDaysUntilNextPay: numberOfDaysUntilNextPay(),
+      currentBalance: currentBalance(result.Items),
+      dailyBudget: currentBalance(result.Items)/numberOfDaysUntilNextPay(),
+    };
+    return res.json(response);
+  });
+});
+
 
 app.post('/updateBudgetItem', (req, res) => {
   const {id, budgetId, name, cost, dueDate, balance} = JSON.parse(req.apiGateway.event.body);
@@ -232,30 +259,5 @@ app.delete('/deleteBudgetItem', (req, res) => {
   });
 });
 
-app.post('/budgetItems', (req, res) => {
-  const {budgetId} = JSON.parse(req.apiGateway.event.body);
-
-  const params = {
-    TableName: process.env.BUDGET_ITEMS_TABLE,
-    IndexName: 'budgetId',
-    KeyConditionExpression: 'budgetId = :budgetId',
-    ExpressionAttributeValues: {
-      ':budgetId': budgetId,
-    },
-  };
-
-  dynamoDb.query(params, (error, result) => {
-    response = {
-      BudgetItems: result.Items,
-      budgetTotal: totalBudget(result.Items),
-      totalByPayPeriod: totalByPayPeriod(result.Items),
-      currentMonth: getCurrentMonth(),
-      numberOfDaysUntilNextPay: numberOfDaysUntilNextPay(),
-      currentBalance: currentBalance(result.Items),
-      dailyBudget: currentBalance(result.Items)/numberOfDaysUntilNextPay(),
-    };
-    return res.json(response);
-  });
-});
 
 module.exports.handler = serverless(app);
