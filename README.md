@@ -15,7 +15,7 @@ Serverless Framework:
 
 `npm i`
 
-run `sls offline start.` This should start a local dynamoDB instance, as well as a local API Gateway, which bypasses authorization for local testing. **API endpoints run from localhost:3000."
+run `sls offline start.` This should start a local dynamoDB instance, as well as a local API Gateway, which bypasses authorization for local testing. **API endpoints run from localhost:3000.**
 
 ***API endpoints***
 
