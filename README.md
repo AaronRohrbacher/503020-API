@@ -23,6 +23,8 @@ run `sls offline start.` This should start a local dynamoDB instance, as well as
 POST /createBudget
 {
   "userId": "userId,
-  "budgetName": "budgetName
+  "budgetName": "budgetName",
 }
+
+On 200, returns same params.
 ``
