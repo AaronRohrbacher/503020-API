@@ -90,7 +90,7 @@ app.post('/createBudget', (req, res) => {
       userId: userId,
       budgetName: budgetName,
       currentBankBalance: currentBankBalance,
-      type: 'budget'
+      type: 'budget',
     },
   };
   dynamoDb.put(params, (error) => {
@@ -217,7 +217,6 @@ app.post('/readBudgetItems', (req, res) => {
   });
 });
 
-
 app.post('/updateBudgetItem', (req, res) => {
   const {id, budgetId, name, cost, dueDate, balance} = JSON.parse(req.apiGateway.event.body);
   const params = {
@@ -260,6 +259,5 @@ app.delete('/deleteBudgetItem', (req, res) => {
     res.json(params);
   });
 });
-
 
 module.exports.handler = serverless(app);
