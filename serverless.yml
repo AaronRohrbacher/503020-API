@@ -38,12 +38,6 @@ provider:
         - cognito-idp:AdminCreateUser
         - cognito-idp:AdminSetUserPassword
       Resource:
-        - { "Fn::GetAtt": ["BudgetsDynamoDBTable", "Arn"] }
-        - Fn::Join:
-            - "/"
-            - 
-              - { "Fn::GetAtt": ["BudgetsDynamoDBTable", "Arn"] }
-              - "index/*"
         - { "Fn::GetAtt": ["BudgetItemsDynamoDBTable", "Arn"] }
         - Fn::Join:
             - "/"
