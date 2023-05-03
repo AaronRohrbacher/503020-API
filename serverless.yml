@@ -234,16 +234,17 @@ functions:
             type: "request"
 resources:
   Resources:
-    BudgetsDynamoDBTable:
+    BudgetItemsDynamoDBTable:
       Type: "AWS::DynamoDB::Table"
       Properties:
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
-          - AttributeName: budgetName
-            AttributeType: S
           - AttributeName: userId
             AttributeType: S
+          - AttributeName: budgetId
+            AttributeType: S
+
         KeySchema:
           - AttributeName: id
             KeyType: HASH
@@ -252,29 +253,12 @@ resources:
             KeySchema:
               - AttributeName: userId
                 KeyType: HASH
-              - AttributeName: budgetName
-                KeyType: RANGE
             Projection:
               ProjectionType: "ALL"
             ProvisionedThroughput:
               ReadCapacityUnits: 1
               WriteCapacityUnits: 1
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-        TableName: ${self:custom.budgetsTableName}
-    BudgetItemsDynamoDBTable:
-      Type: "AWS::DynamoDB::Table"
-      Properties:
-        AttributeDefinitions:
-          - AttributeName: id
-            AttributeType: S
-          - AttributeName: budgetId
-            AttributeType: S
-        KeySchema:
-          - AttributeName: id
-            KeyType: HASH
-        GlobalSecondaryIndexes:
+
           - IndexName: budgetId
             KeySchema:
               - AttributeName: budgetId

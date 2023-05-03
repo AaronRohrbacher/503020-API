@@ -84,12 +84,13 @@ app.post('/createBudget', (req, res) => {
   const {userId, budgetName, currentBankBalance} = JSON.parse(req.apiGateway.event.body);
   const id = (Date.now() + Math.random()).toString();
   const params = {
-    TableName: process.env.BUDGETS_TABLE,
+    TableName: process.env.BUDGET_ITEMS_TABLE,
     Item: {
       id: id,
       userId: userId,
       budgetName: budgetName,
       currentBankBalance: currentBankBalance,
+      type: 'budget'
     },
   };
   dynamoDb.put(params, (error) => {
@@ -105,7 +106,7 @@ app.post('/readBudgets', (req, res) => {
   console.log(dynamoDb);
   const {userId} = JSON.parse(req.apiGateway.event.body);
   const params = {
-    TableName: process.env.BUDGETS_TABLE,
+    TableName: process.env.BUDGET_ITEMS_TABLE,
     IndexName: 'userId',
     KeyConditionExpression: 'userId = :userId',
     ExpressionAttributeValues: {
@@ -128,13 +129,14 @@ app.post('/readBudgets', (req, res) => {
 app.post('/updateBudget', (req, res) => {
   const {id, userId, budgetName} = JSON.parse(req.apiGateway.event.body);
   const params = {
-    TableName: process.env.BUDGETS_TABLE,
+    TableName: process.env.BUDGET_ITEMS_TABLE,
     // UpdateExpression : "SET",
     Key: {
       id: id,
     },
     Item: {
       id: id,
+      budgetId: id,
       userId: userId,
       budgetName: budgetName,
 
@@ -156,7 +158,7 @@ app.delete('/deleteBudget', (req, res) => {
       id: id,
       budgetName: budgetName,
     },
-    TableName: process.env.BUDGETS_TABLE,
+    TableName: process.env.BUDGET_ITEMS_TABLE,
   };
   dynamoDb.delete(params, (error) => {
     if (error) {

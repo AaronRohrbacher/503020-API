@@ -2,7 +2,6 @@ describe('POST Budget CRUD:', () => {
   beforeEach(() => {
     cy.request('POST', '/createBudget', {userId: '1a', budgetName: 'Happy Budget'});
     cy.request('POST', '/createBudget', {userId: '1b', budgetName: 'Sad Budget'});
-    cy.request('POST', '/createBudget', {userId: '1b', budgetName: 'Sorted Budget'});
   });
   it('returns a list of a given user\'s budgets', () => {
     cy.request('POST', '/readBudgets', {userId: '1a'}).then((response) => {
