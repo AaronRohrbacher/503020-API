@@ -127,7 +127,7 @@ app.post('/readBudgets', (req, res) => {
 });
 
 app.post('/updateBudget', (req, res) => {
-  const {id, userId, budgetName} = JSON.parse(req.apiGateway.event.body);
+  const {id, userId, budgetName, currentBankBalance} = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
     // UpdateExpression : "SET",
@@ -139,7 +139,7 @@ app.post('/updateBudget', (req, res) => {
       budgetId: id,
       userId: userId,
       budgetName: budgetName,
-
+      currentBankBalance: currentBankBalance,
     },
   };
   dynamoDb.put(params, (error) => {
