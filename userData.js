@@ -136,7 +136,6 @@ app.post('/updateBudget', (req, res) => {
     },
     Item: {
       id: id,
-      budgetId: id,
       userId: userId,
       budgetName: budgetName,
       currentBankBalance: currentBankBalance,
