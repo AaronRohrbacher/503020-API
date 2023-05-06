@@ -118,6 +118,24 @@ functions:
           localAuthorizer:
             name: "mylocalAuthProxyFn"
             type: "request"
+  readBudget:
+    handler: userData.handler
+    events:
+      - http:
+          path: /readBudget
+          method: post
+          authorizer:
+            name: 503020_authorizer
+            type: COGNITO_USER_POOLS
+            arn:
+              Fn::GetAtt:
+                - 503020UserPool
+                - Arn
+            claims:
+              - email
+          localAuthorizer:
+            name: "mylocalAuthProxyFn"
+            type: "request"
   updateBudget:
     handler: userData.handler
     events:

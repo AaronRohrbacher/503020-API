@@ -102,6 +102,29 @@ app.post('/createBudget', (req, res) => {
   });
 });
 
+app.post('/readBudget', (req, res) => {
+  const {id} = JSON.parse(req.apiGateway.event.body);
+  const params = {
+    TableName: process.env.BUDGET_ITEMS_TABLE,
+    KeyConditionExpression: 'id = :id',
+    ExpressionAttributeValues: {
+      ':id': id,
+    },
+    Key: {
+      id: id,
+    },
+  };
+  dynamoDb.query(params, (error, result) => {
+    if (error) {
+      console.log(error);
+      res.status(400).json(error);
+    }
+    if (result) {
+      res.json(result);
+    }
+  });
+});
+
 app.post('/readBudgets', (req, res) => {
   console.log(dynamoDb);
   const {userId} = JSON.parse(req.apiGateway.event.body);
@@ -130,7 +153,6 @@ app.post('/updateBudget', (req, res) => {
   const {id, userId, budgetName, currentBankBalance} = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
-    // UpdateExpression : "SET",
     Key: {
       id: id,
     },

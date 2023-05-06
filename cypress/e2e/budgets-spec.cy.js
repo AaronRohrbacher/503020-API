@@ -15,6 +15,15 @@ describe('POST Budget CRUD:', () => {
       expect(response.body.Items[0]).to.have.property('currentBankBalance', 10);
     });
   });
+  it('reads a budget', () => {
+    cy.request('POST', '/readBudgets', {userId: '1a'}).then((response) => {
+      expect(response.body.Items.length).to.equal(1);
+      cy.request('POST', '/readBudget', {id: response.body.Items[0].id}).then((response) => {
+        console.log(response);
+        expect(response.body.Items[0].budgetName).to.equal('Happy Budget');
+      });
+    });
+  });
   it('updates a budget', () => {
     cy.request('POST', '/readBudgets', {userId: '1a'}).then((response) => {
       cy.request('POST', '/updateBudget', {id: response.body.Items[0].id, budgetName: 'edited Name', userId: '1a'});
@@ -27,7 +36,6 @@ describe('POST Budget CRUD:', () => {
     cy.request('POST', '/readBudgets', {userId: '1a'}).then((response) => {
       cy.request('POST', '/updateBudget', {id: response.body.Items[0].id, userId: '1a', currentBankBalance: 1000});
       cy.request('POST', '/readBudgets', {userId: '1a'}).then((response) => {
-        console.log(response);
         expect(response.body.Items[0]).to.have.property('currentBankBalance', 1000);
       });
     });
