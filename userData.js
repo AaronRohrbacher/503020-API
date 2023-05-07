@@ -235,7 +235,6 @@ app.post('/readBudgetItem', (req, res) => {
   });
 });
 
-
 app.post('/readBudgetItems', (req, res) => {
   const {budgetId} = JSON.parse(req.apiGateway.event.body);
 
