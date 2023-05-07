@@ -212,6 +212,30 @@ app.post('/createBudgetItem', (req, res) => {
   });
 });
 
+app.post('/readBudgetItem', (req, res) => {
+  const {id} = JSON.parse(req.apiGateway.event.body);
+  const params = {
+    TableName: process.env.BUDGET_ITEMS_TABLE,
+    KeyConditionExpression: 'id = :id',
+    ExpressionAttributeValues: {
+      ':id': id,
+    },
+    Key: {
+      id: id,
+    },
+  };
+  dynamoDb.query(params, (error, result) => {
+    if (error) {
+      console.log(error);
+      res.status(400).json(error);
+    }
+    if (result) {
+      res.json(result);
+    }
+  });
+});
+
+
 app.post('/readBudgetItems', (req, res) => {
   const {budgetId} = JSON.parse(req.apiGateway.event.body);
 

@@ -16,13 +16,21 @@ describe('POST budgetItems CRUD:', () => {
       expect(response.body.BudgetItems[0]).to.have.property('dueDate', 15);
     });
   });
+  it('reads a budgetItem', () => {
+    cy.request('POST', '/readBudgetItems', {budgetId: '1a'}).then((response) => {
+      expect(response.body.BudgetItems.length).to.equal(1);
+      cy.request('POST', '/readBudgetItem', {id: response.body.BudgetItems[0].id}).then((response) => {
+        expect(response.body.Items[0].name).to.equal('name');
+      });
+    });
+
+  })
   it('updates a budgetItem', () => {
     cy.request('POST', '/readBudgetItems', {budgetId: '1a'}).then((response) => {
-      console.log(response);
-      cy.request('POST', '/updateBudgetItem', {id: response.body.BudgetItems[0].id, budgetId: '1a', name: 'edited Name', cost: 4.20, dueDate: 122});
-      cy.request('POST', '/readBudgetItems', {budgetId: '1a'}).then((response) => {
-        console.log(response);
-        expect(response.body.BudgetItems[0]).to.have.property('name', 'edited Name');
+      cy.request('POST', '/updateBudgetItem', {id: response.body.BudgetItems[0].id, name: 'edited Name', cost: 4.20, dueDate: 122});
+      cy.request('POST', '/readBudgetItem', {id: response.body.BudgetItems[0].id}).then((response) => {
+        console.log(response)
+        expect(response.body.Items[0]).to.have.property('name', 'edited Name');
       });
     });
   });
