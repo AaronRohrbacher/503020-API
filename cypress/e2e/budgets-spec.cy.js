@@ -19,7 +19,6 @@ describe('POST Budget CRUD:', () => {
     cy.request('POST', '/readBudgets', {userId: '1a'}).then((response) => {
       expect(response.body.Items.length).to.equal(1);
       cy.request('POST', '/readBudget', {id: response.body.Items[0].id}).then((response) => {
-        console.log(response);
         expect(response.body.Items[0].budgetName).to.equal('Happy Budget');
       });
     });

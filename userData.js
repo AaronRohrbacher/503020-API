@@ -76,12 +76,35 @@ const currentBalance = (budgetItems) => {
   return balance;
 };
 
+let getBudget = async (budgetId) => {
+  console.log(budgetId)
+  const params = {
+    TableName: process.env.BUDGET_ITEMS_TABLE,
+    KeyConditionExpression: 'id = :id',
+    ExpressionAttributeValues: {
+      ':id': budgetId,
+    },
+    Key: {
+      id: budgetId,
+    },
+  };
+  let thing = await dynamoDb.query(params, (err, data) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    console.log(data)
+  });
+  return thing
+}
+
+
 app.post('/userData', (req, res) => {
   res.json(req.requestContext.authorizer.claims);
 });
 
 app.post('/createBudget', (req, res) => {
-  const {userId, budgetName, currentBankBalance} = JSON.parse(req.apiGateway.event.body);
+  const { userId, budgetName, currentBankBalance } = JSON.parse(req.apiGateway.event.body);
   const id = (Date.now() + Math.random()).toString();
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
@@ -95,15 +118,14 @@ app.post('/createBudget', (req, res) => {
   };
   dynamoDb.put(params, (error) => {
     if (error) {
-      console.log(error);
       return res.status(400).json(error);
     }
-    res.json({params});
+    res.json({ params });
   });
 });
 
 app.post('/readBudget', (req, res) => {
-  const {id} = JSON.parse(req.apiGateway.event.body);
+  const { id } = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
     KeyConditionExpression: 'id = :id',
@@ -116,7 +138,6 @@ app.post('/readBudget', (req, res) => {
   };
   dynamoDb.query(params, (error, result) => {
     if (error) {
-      console.log(error);
       res.status(400).json(error);
     }
     if (result) {
@@ -126,8 +147,7 @@ app.post('/readBudget', (req, res) => {
 });
 
 app.post('/readBudgets', (req, res) => {
-  console.log(dynamoDb);
-  const {userId} = JSON.parse(req.apiGateway.event.body);
+  const { userId } = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
     IndexName: 'userId',
@@ -138,19 +158,18 @@ app.post('/readBudgets', (req, res) => {
   };
   dynamoDb.query(params, (error, result) => {
     if (error) {
-      console.log(error);
       res.status(400).json(error);
     }
     if (result) {
       res.json(result);
     } else {
-      res.status(404).json({error: 'budgets not found'});
+      res.status(404).json({ error: 'budgets not found' });
     }
   });
 });
 
 app.post('/updateBudget', (req, res) => {
-  const {id, userId, budgetName, currentBankBalance} = JSON.parse(req.apiGateway.event.body);
+  const { id, userId, budgetName, currentBankBalance } = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
     Key: {
@@ -165,7 +184,6 @@ app.post('/updateBudget', (req, res) => {
   };
   dynamoDb.put(params, (error) => {
     if (error) {
-      console.log(error);
       return res.status(400).json(error);
     }
     res.json(params);
@@ -173,7 +191,7 @@ app.post('/updateBudget', (req, res) => {
 });
 
 app.delete('/deleteBudget', (req, res) => {
-  const {id, budgetName} = JSON.parse(req.apiGateway.event.body);
+  const { id, budgetName } = JSON.parse(req.apiGateway.event.body);
   const params = {
     Key: {
       id: id,
@@ -183,7 +201,6 @@ app.delete('/deleteBudget', (req, res) => {
   };
   dynamoDb.delete(params, (error) => {
     if (error) {
-      console.log(error);
       return res.status(400).json(error);
     }
     res.json(params);
@@ -191,7 +208,7 @@ app.delete('/deleteBudget', (req, res) => {
 });
 
 app.post('/createBudgetItem', (req, res) => {
-  const {budgetId, name, cost, dueDate, balance} = JSON.parse(req.apiGateway.event.body);
+  const { budgetId, name, cost, dueDate, balance } = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
     Item: {
@@ -205,7 +222,6 @@ app.post('/createBudgetItem', (req, res) => {
   };
   dynamoDb.put(params, (error) => {
     if (error) {
-      console.log(error);
       return res.status(400).json(error);
     }
     res.json(params);
@@ -213,7 +229,7 @@ app.post('/createBudgetItem', (req, res) => {
 });
 
 app.post('/readBudgetItem', (req, res) => {
-  const {id} = JSON.parse(req.apiGateway.event.body);
+  const { id } = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
     KeyConditionExpression: 'id = :id',
@@ -226,7 +242,6 @@ app.post('/readBudgetItem', (req, res) => {
   };
   dynamoDb.query(params, (error, result) => {
     if (error) {
-      console.log(error);
       res.status(400).json(error);
     }
     if (result) {
@@ -236,8 +251,7 @@ app.post('/readBudgetItem', (req, res) => {
 });
 
 app.post('/readBudgetItems', (req, res) => {
-  const {budgetId} = JSON.parse(req.apiGateway.event.body);
-
+  const { budgetId } = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
     IndexName: 'budgetId',
@@ -246,7 +260,6 @@ app.post('/readBudgetItems', (req, res) => {
       ':budgetId': budgetId,
     },
   };
-
   dynamoDb.query(params, (error, result) => {
     response = {
       BudgetItems: result.Items,
@@ -255,14 +268,15 @@ app.post('/readBudgetItems', (req, res) => {
       currentMonth: getCurrentMonth(),
       numberOfDaysUntilNextPay: numberOfDaysUntilNextPay(),
       currentBalance: currentBalance(result.Items),
-      dailyBudget: currentBalance(result.Items)/numberOfDaysUntilNextPay(),
+      dailyBudget: currentBalance(result.Items) / numberOfDaysUntilNextPay(),
+      bankBalance: getBudget(budgetId)
     };
     return res.json(response);
   });
-});
+})
 
 app.post('/updateBudgetItem', (req, res) => {
-  const {id, budgetId, name, cost, dueDate, balance} = JSON.parse(req.apiGateway.event.body);
+  const { id, budgetId, name, cost, dueDate, balance } = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
     // UpdateExpression : "SET",
@@ -280,7 +294,6 @@ app.post('/updateBudgetItem', (req, res) => {
   };
   dynamoDb.put(params, (error) => {
     if (error) {
-      console.log(error);
       return res.status(400).json(error);
     }
     res.json(params);
@@ -288,7 +301,7 @@ app.post('/updateBudgetItem', (req, res) => {
 });
 
 app.delete('/deleteBudgetItem', (req, res) => {
-  const {id} = JSON.parse(req.apiGateway.event.body);
+  const { id } = JSON.parse(req.apiGateway.event.body);
   const params = {
     Key: {
       id: id,
@@ -297,7 +310,6 @@ app.delete('/deleteBudgetItem', (req, res) => {
   };
   dynamoDb.delete(params, (error) => {
     if (error) {
-      console.log(error);
       return res.status(400).json(error);
     }
     res.json(params);
