@@ -88,16 +88,15 @@ let getBudget = async (budgetId) => {
       id: budgetId,
     },
   };
-  let thing = await dynamoDb.query(params, (err, data) => {
+  await dynamoDb.query(params, (err, data) => {
     if (err) {
       console.error(err);
       return;
     }
-    console.log(data)
+    console.log(data) //shows up
+    return(data) // empty object shows up in the payload.
   });
-  return thing
 }
-
 
 app.post('/userData', (req, res) => {
   res.json(req.requestContext.authorizer.claims);
