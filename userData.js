@@ -76,7 +76,7 @@ const currentBalance = (budgetItems) => {
   return balance;
 };
 
-let getBudget = async (budgetId) => {
+const getBudget = async (budgetId) => {
   console.log(budgetId)
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
@@ -88,7 +88,7 @@ let getBudget = async (budgetId) => {
       id: budgetId,
     },
   };
-  await dynamoDb.query(params, (err, data) => {
+  return await dynamoDb.query(params, (err, data) => {
     if (err) {
       console.error(err);
       return;
