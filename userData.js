@@ -258,7 +258,7 @@ app.post('/readBudgetItems', (req, res) => {
       ':budgetId': budgetId,
     },
   };
-  const bankBalance = getBudget(budgetId).then((bankBalance) => {
+  getBudget(budgetId).then((bankBalance) => {
     dynamoDb.query(params, (error, result) => {
       response = {
         BudgetItems: result.Items,
