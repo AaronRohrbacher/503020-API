@@ -25,7 +25,7 @@ describe('POST Budget CRUD:', () => {
   });
   it('updates a budget', () => {
     cy.request('POST', '/readBudgets', {userId: '1a'}).then((response) => {
-      cy.request('POST', '/updateBudget', {id: response.body.Items[0].id, budgetName: 'edited Name', userId: '1a'});
+      cy.request('POST', '/updateBudget', {id: response.body.Items[0].id, budgetName: 'edited Name', userId: '1a', currentBankBalance: 10});
       cy.request('POST', '/readBudgets', {userId: '1a'}).then((response) => {
         expect(response.body.Items[0]).to.have.property('budgetName', 'edited Name');
       });

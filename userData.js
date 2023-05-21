@@ -64,19 +64,7 @@ const numberOfDaysUntilNextPay = () => {
   }
 };
 
-const currentBalance = (budgetItems) => {
-  let id = 0;
-  let balance;
-  budgetItems.forEach((item) => {
-    if (item.balance && item.id > id) {
-      id = item.id;
-      balance = item.balance;
-    }
-  });
-  return balance;
-};
-
-const getBudget = async (budgetId) => {
+const bankBalance = async (budgetId) => {
   console.log(budgetId);
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
@@ -94,7 +82,8 @@ const getBudget = async (budgetId) => {
   } catch (error) {
     throw new Error(error);
   }
-  return data;
+  console.log(data);
+  return data.Items[0].currentBankBalance;
 };
 
 app.post('/userData', (req, res) => {
@@ -258,7 +247,7 @@ app.post('/readBudgetItems', (req, res) => {
       ':budgetId': budgetId,
     },
   };
-  getBudget(budgetId).then((bankBalance) => {
+  bankBalance(budgetId).then((bankBalance) => {
     dynamoDb.query(params, (error, result) => {
       response = {
         BudgetItems: result.Items,
@@ -266,8 +255,7 @@ app.post('/readBudgetItems', (req, res) => {
         totalByPayPeriod: totalByPayPeriod(result.Items),
         currentMonth: getCurrentMonth(),
         numberOfDaysUntilNextPay: numberOfDaysUntilNextPay(),
-        currentBalance: currentBalance(result.Items),
-        dailyBudget: currentBalance(result.Items) / numberOfDaysUntilNextPay(),
+        dailyBudget: bankBalance / numberOfDaysUntilNextPay(),
         bankBalance: bankBalance,
       };
       return res.json(response);
