@@ -64,8 +64,11 @@ const numberOfDaysUntilNextPay = () => {
   }
 };
 
-const bankBalance = async (budgetId) => {
-  console.log(budgetId);
+const expectedIncome = (budget) => {
+  return budget.expectedPaycheckAmount * 2;
+};
+
+const getBudget = async (budgetId) => {
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
     KeyConditionExpression: 'id = :id',
@@ -82,8 +85,17 @@ const bankBalance = async (budgetId) => {
   } catch (error) {
     throw new Error(error);
   }
-  console.log(data);
-  return data.Items[0].currentBankBalance;
+  return data.Items[0];
+};
+
+const pendingItemBalance = (budgetItems) => {
+  let pendingBalance = 0;
+  budgetItems.forEach((item) => {
+    if (item.pending === true) {
+      pendingBalance += item.cost;
+    }
+  });
+  return pendingBalance;
 };
 
 app.post('/userData', (req, res) => {
@@ -91,7 +103,7 @@ app.post('/userData', (req, res) => {
 });
 
 app.post('/createBudget', (req, res) => {
-  const {userId, budgetName, currentBankBalance} = JSON.parse(req.apiGateway.event.body);
+  const {userId, budgetName, currentBankBalance, expectedPaycheckAmount} = JSON.parse(req.apiGateway.event.body);
   const id = (Date.now() + Math.random()).toString();
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
@@ -101,6 +113,7 @@ app.post('/createBudget', (req, res) => {
       budgetName: budgetName,
       currentBankBalance: currentBankBalance,
       type: 'budget',
+      expectedPaycheckAmount: expectedPaycheckAmount,
     },
   };
   dynamoDb.put(params, (error) => {
@@ -156,7 +169,7 @@ app.post('/readBudgets', (req, res) => {
 });
 
 app.post('/updateBudget', (req, res) => {
-  const {id, userId, budgetName, currentBankBalance} = JSON.parse(req.apiGateway.event.body);
+  const {id, userId, budgetName, currentBankBalance, expectedPaycheckAmount} = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
     Key: {
@@ -167,6 +180,7 @@ app.post('/updateBudget', (req, res) => {
       userId: userId,
       budgetName: budgetName,
       currentBankBalance: currentBankBalance,
+      expectedPaycheckAmount: expectedPaycheckAmount,
     },
   };
   dynamoDb.put(params, (error) => {
@@ -195,7 +209,7 @@ app.delete('/deleteBudget', (req, res) => {
 });
 
 app.post('/createBudgetItem', (req, res) => {
-  const {budgetId, name, cost, dueDate, balance} = JSON.parse(req.apiGateway.event.body);
+  const {budgetId, name, cost, dueDate, balance, pending} = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
     Item: {
@@ -205,6 +219,7 @@ app.post('/createBudgetItem', (req, res) => {
       cost: cost,
       dueDate: dueDate,
       balance: balance,
+      pending: pending,
     },
   };
   dynamoDb.put(params, (error) => {
@@ -247,7 +262,7 @@ app.post('/readBudgetItems', (req, res) => {
       ':budgetId': budgetId,
     },
   };
-  bankBalance(budgetId).then((bankBalance) => {
+  getBudget(budgetId).then((budget) => {
     dynamoDb.query(params, (error, result) => {
       response = {
         BudgetItems: result.Items,
@@ -255,8 +270,11 @@ app.post('/readBudgetItems', (req, res) => {
         totalByPayPeriod: totalByPayPeriod(result.Items),
         currentMonth: getCurrentMonth(),
         numberOfDaysUntilNextPay: numberOfDaysUntilNextPay(),
-        dailyBudget: bankBalance / numberOfDaysUntilNextPay(),
-        bankBalance: bankBalance,
+        dailyBudget: budget.currentBankBalance / numberOfDaysUntilNextPay(),
+        bankBalance: budget.currentBankBalance,
+        estimatedMonthlyDailySpending: (expectedIncome(budget) + budget.currentBankBalance) / 31,
+        expectedIncome: expectedIncome(budget),
+        pendingItemBalance: pendingItemBalance(result.Items),
       };
       return res.json(response);
     });
@@ -264,10 +282,9 @@ app.post('/readBudgetItems', (req, res) => {
 });
 
 app.post('/updateBudgetItem', (req, res) => {
-  const {id, budgetId, name, cost, dueDate, balance} = JSON.parse(req.apiGateway.event.body);
+  const {id, budgetId, name, cost, dueDate, balance, pending} = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
-    // UpdateExpression : "SET",
     Key: {
       id: id,
     },
@@ -278,6 +295,7 @@ app.post('/updateBudgetItem', (req, res) => {
       cost: cost,
       dueDate: dueDate,
       balance: balance,
+      pending: pending,
     },
   };
   dynamoDb.put(params, (error) => {
