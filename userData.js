@@ -264,15 +264,17 @@ app.post('/readBudgetItems', (req, res) => {
   };
   getBudget(budgetId).then((budget) => {
     dynamoDb.query(params, (error, result) => {
+      const perPeriod = totalByPayPeriod(result.Items);
       response = {
         BudgetItems: result.Items,
         budgetTotal: totalBudget(result.Items),
-        totalByPayPeriod: totalByPayPeriod(result.Items),
+        pre15Total: perPeriod.pre15Total,
+        post15Total: perPeriod.post15Total,
         currentMonth: getCurrentMonth(),
         numberOfDaysUntilNextPay: numberOfDaysUntilNextPay(),
         dailyBudget: budget.currentBankBalance / numberOfDaysUntilNextPay(),
         bankBalance: budget.currentBankBalance,
-        estimatedMonthlyDailySpending: (expectedIncome(budget) + budget.currentBankBalance) / 31,
+        estimatedMonthlyDailySpending: expectedIncome(budget) / 31,
         expectedIncome: expectedIncome(budget),
         pendingItemBalance: pendingItemBalance(result.Items),
       };
