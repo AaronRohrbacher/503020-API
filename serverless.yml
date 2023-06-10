@@ -50,6 +50,8 @@ provider:
     BUDGET_ITEMS_TABLE: ${self:custom.budgetItemsTableName}
     user_pool_id: { Ref: 503020UserPool }
     client_id: { Ref: 503020UserPoolClient }
+    STAGE_NAME: ${self:provider.stage} 
+    VERSION_NUMBER: "v1"
 
 functions:
   signup:
