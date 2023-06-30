@@ -60,18 +60,21 @@ functions:
       - http:
           path: /signup
           method: post
+          cors: true
   login:
     handler: auth/login.handler
     events:
       - http:
           path: /login
           method: post
+          cors: true
   userData:
     handler: userData.handler
     events:
       - http:
           path: /userData
           method: post
+          cors: true
           authorizer:
             name: 503020_authorizer
             type: COGNITO_USER_POOLS
@@ -90,6 +93,7 @@ functions:
       - http:
           path: /createBudget
           method: post
+          cors: true
           authorizer:
             name: 503020_authorizer
             type: COGNITO_USER_POOLS
@@ -107,7 +111,8 @@ functions:
     events:
       - http:
           path: /readBudgets
-          method: post
+          method: any
+          cors: true
           authorizer:
             name: 503020_authorizer
             type: COGNITO_USER_POOLS
@@ -120,12 +125,14 @@ functions:
           localAuthorizer:
             name: "mylocalAuthProxyFn"
             type: "request"
+
   readBudget:
     handler: userData.handler
     events:
       - http:
           path: /readBudget
           method: post
+          cors: true
           authorizer:
             name: 503020_authorizer
             type: COGNITO_USER_POOLS
@@ -144,6 +151,7 @@ functions:
       - http:
           path: /updateBudget
           method: post
+          cors: true
           authorizer:
             name: 503020_authorizer
             type: COGNITO_USER_POOLS
@@ -180,6 +188,7 @@ functions:
       - http:
           path: /createBudgetItem
           method: post
+          cors: true
           authorizer:
             name: 503020_authorizer
             type: COGNITO_USER_POOLS
@@ -217,6 +226,7 @@ functions:
       - http:
           path: /readBudgetItems
           method: post
+          cors: true
           authorizer:
             name: 503020_authorizer
             type: COGNITO_USER_POOLS
@@ -235,6 +245,7 @@ functions:
       - http:
           path: /updateBudgetItem
           method: post
+          cors: true
           authorizer:
             name: 503020_authorizer
             type: COGNITO_USER_POOLS
@@ -277,7 +288,6 @@ resources:
             AttributeType: S
           - AttributeName: budgetId
             AttributeType: S
-
         KeySchema:
           - AttributeName: id
             KeyType: HASH
@@ -291,7 +301,6 @@ resources:
             ProvisionedThroughput:
               ReadCapacityUnits: 1
               WriteCapacityUnits: 1
-
           - IndexName: budgetId
             KeySchema:
               - AttributeName: budgetId

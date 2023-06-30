@@ -4,6 +4,7 @@ const app = express();
 const CognitoExpress = require('cognito-express');
 const AWS = require('aws-sdk');
 const moment = require('moment');
+const cors = require('cors');
 const IS_OFFLINE = process.env.IS_OFFLINE;
 
 let dynamoDb;
@@ -147,6 +148,7 @@ app.post('/readBudget', (req, res) => {
 });
 
 app.post('/readBudgets', (req, res) => {
+  res.header('Access-Control-Allow-Origin', 'https://dev.bludget.com');
   const {userId} = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
@@ -157,14 +159,14 @@ app.post('/readBudgets', (req, res) => {
     },
   };
   dynamoDb.query(params, (error, result) => {
-    if (error) {
-      res.status(400).json(error);
-    }
-    if (result) {
-      res.json(result);
-    } else {
-      res.status(404).json({error: 'budgets not found'});
-    }
+    // if (error) {
+    //   res.status(400).json(error);
+    // }
+    // if (result) {
+    res.json(result);
+    // } else {
+    // res.status(404).json({error: 'budgets not found'});
+    // }
   });
 });
 

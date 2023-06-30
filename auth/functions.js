@@ -4,7 +4,7 @@ const sendResponse = (statusCode, body) => {
     body: JSON.stringify(body),
     headers: {
       'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': 'https://dev.bludget.com',
       'Access-Control-Allow-Credentials': true,
     },
   };
@@ -13,8 +13,8 @@ const sendResponse = (statusCode, body) => {
 
 const validateInput = (data) => {
   const body = JSON.parse(data);
-  const {email, password} = body;
-  if (!email || !password || password.length < 6) {
+  const {username, password} = body;
+  if (!username || !password || password.length < 6) {
     return false;
   }
   return true;
