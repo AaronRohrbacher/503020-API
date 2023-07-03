@@ -9,3 +9,5 @@ jspm_packages
 # Cypress screenshots
 cypress/screenshots
 cypress/videos
+
+.env

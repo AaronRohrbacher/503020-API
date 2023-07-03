@@ -20,6 +20,15 @@ custom:
   serverless-offline:
     noPrependStageInUrl: true
     reloadHandler: true
+  CognitoAddCustomAttributes: 
+    CognitoUserPoolIdOutputKey: 'CognitoUserPoolApplicationUserPoolId'
+    CognitoUserPoolClientIdOutputKey: 'CognitoUserPoolApplicationUserPoolClientId'
+    CustomAttributes: 
+      - AttributeDataType: String
+        DeveloperOnlyAttribute: False
+        Mutable: True
+        Name: "custom:firstName"
+        Required: False
 provider:
   name: aws
   runtime: nodejs18.x
@@ -52,7 +61,6 @@ provider:
     client_id: { Ref: 503020UserPoolClient }
     STAGE_NAME: ${self:provider.stage} 
     VERSION_NUMBER: "v1"
-
 functions:
   signup:
     handler: auth/signup.handler
@@ -125,7 +133,6 @@ functions:
           localAuthorizer:
             name: "mylocalAuthProxyFn"
             type: "request"
-
   readBudget:
     handler: userData.handler
     events:
@@ -219,7 +226,6 @@ functions:
           localAuthorizer:
             name: "mylocalAuthProxyFn"
             type: "request"
-
   readBudgetItems:
     handler: userData.handler
     events:
@@ -277,6 +283,13 @@ functions:
             name: "mylocalAuthProxyFn"
             type: "request"
 resources:
+  Outputs:
+    CognitoUserPoolApplicationUserPoolId:
+      Value:
+        Ref: 503020UserPool
+    CognitoUserPoolApplicationUserPoolClientId:
+      Value:
+        Ref: 503020UserPoolClient
   Resources:
     BudgetItemsDynamoDBTable:
       Type: "AWS::DynamoDB::Table"

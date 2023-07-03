@@ -10,15 +10,15 @@ module.exports.handler = async (event) => {
       return sendResponse(400, {message: 'Invalid input'});
     }
 
-    const {email, password, firstName} = JSON.parse(event.body);
+    const {username, password, firstName} = JSON.parse(event.body);
     const {user_pool_id} = process.env;
     const params = {
       UserPoolId: user_pool_id,
-      Username: email,
+      Username: username,
       UserAttributes: [
         {
           Name: 'email',
-          Value: email,
+          Value: username,
         },
         {
           Name: 'custom:firstName',
@@ -35,7 +35,7 @@ module.exports.handler = async (event) => {
       const paramsForSetPass = {
         Password: password,
         UserPoolId: user_pool_id,
-        Username: email,
+        Username: username,
         Permanent: true,
       };
       await cognito.adminSetUserPassword(paramsForSetPass).promise();

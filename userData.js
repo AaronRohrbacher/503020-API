@@ -148,7 +148,7 @@ app.post('/readBudget', (req, res) => {
 });
 
 app.post('/readBudgets', (req, res) => {
-  res.header('Access-Control-Allow-Origin', 'https://dev.bludget.com');
+  // res.header('Access-Control-Allow-Origin', 'https://dev.bludget.com');
   const {userId} = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
