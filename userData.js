@@ -7,6 +7,8 @@ const moment = require('moment');
 const cors = require('cors');
 const IS_OFFLINE = process.env.IS_OFFLINE;
 
+app.use(cors({origin: `https://${process.env.STAGE_NAME}.bludget.com`}))
+
 let dynamoDb;
 let cognitoExpress;
 if (IS_OFFLINE === 'true') {
@@ -99,13 +101,11 @@ const pendingItemBalance = (budgetItems) => {
   return pendingBalance;
 };
 
-app.post('/userData', (req, res) => {
-  res.header('Access-Control-Allow-Origin', 'https://dev.bludget.com');
+app.post(`${process.env.BASE_URL}/userData`, (req, res) => {
   res.json(req.requestContext.authorizer.claims);
 });
 
-app.post('/createBudget', (req, res) => {
-  res.header('Access-Control-Allow-Origin', 'https://dev.bludget.com');
+app.post(`${process.env.BASE_URL}/createBudget`, (req, res) => {
   const {userId, budgetName, currentBankBalance, expectedPaycheckAmount} = JSON.parse(req.apiGateway.event.body);
   const id = (Date.now() + Math.random()).toString();
   const params = {
@@ -127,8 +127,7 @@ app.post('/createBudget', (req, res) => {
   });
 });
 
-app.post('/readBudget', (req, res) => {
-  res.header('Access-Control-Allow-Origin', 'https://dev.bludget.com');
+app.post(`${process.env.BASE_URL}/readBudget`, (req, res) => {
   const {id} = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
@@ -150,9 +149,7 @@ app.post('/readBudget', (req, res) => {
   });
 });
 
-app.post('/readBudgets', (req, res) => {
-  res.header('Access-Control-Allow-Origin', 'https://dev.bludget.com');
-  res.header('Access-Control-Allow-Origin', 'https://dev.bludget.com');
+app.post(`${process.env.BASE_URL}/readBudgets`, (req, res) => {
   const {userId} = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
@@ -174,8 +171,7 @@ app.post('/readBudgets', (req, res) => {
   });
 });
 
-app.post('/updateBudget', (req, res) => {
-  res.header('Access-Control-Allow-Origin', 'https://dev.bludget.com');
+app.post(`${process.env.BASE_URL}/updateBudget`, (req, res) => {
   const {id, userId, budgetName, currentBankBalance, expectedPaycheckAmount} = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
@@ -198,8 +194,7 @@ app.post('/updateBudget', (req, res) => {
   });
 });
 
-app.delete('/deleteBudget', (req, res) => {
-  res.header('Access-Control-Allow-Origin', 'https://dev.bludget.com');
+app.delete(`${process.env.BASE_URL}/deleteBudget`, (req, res) => {
   const {id, budgetName} = JSON.parse(req.apiGateway.event.body);
   const params = {
     Key: {
@@ -216,8 +211,7 @@ app.delete('/deleteBudget', (req, res) => {
   });
 });
 
-app.post('/createBudgetItem', (req, res) => {
-  res.header('Access-Control-Allow-Origin', 'https://dev.bludget.com');
+app.post(`${process.env.BASE_URL}/createBudgetItem`, (req, res) => {
   const {budgetId, name, cost, dueDate, balance, pending} = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
@@ -239,8 +233,7 @@ app.post('/createBudgetItem', (req, res) => {
   });
 });
 
-app.post('/readBudgetItem', (req, res) => {
-  res.header('Access-Control-Allow-Origin', 'https://dev.bludget.com');
+app.post(`${process.env.BASE_URL}/readBudgetItem`, (req, res) => {
   const {id} = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
@@ -262,8 +255,7 @@ app.post('/readBudgetItem', (req, res) => {
   });
 });
 
-app.post('/readBudgetItems', (req, res) => {
-  res.header('Access-Control-Allow-Origin', 'https://dev.bludget.com');
+app.post(`${process.env.BASE_URL}/readBudgetItems`, (req, res) => {
   const {budgetId} = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
@@ -294,8 +286,7 @@ app.post('/readBudgetItems', (req, res) => {
   });
 });
 
-app.post('/updateBudgetItem', (req, res) => {
-  res.header('Access-Control-Allow-Origin', 'https://dev.bludget.com');
+app.post(`${process.env.BASE_URL}/updateBudgetItem`, (req, res) => {
   const {id, budgetId, name, cost, dueDate, balance, pending} = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
@@ -320,8 +311,7 @@ app.post('/updateBudgetItem', (req, res) => {
   });
 });
 
-app.delete('/deleteBudgetItem', (req, res) => {
-  res.header('Access-Control-Allow-Origin', 'https://dev.bludget.com');
+app.delete(`${process.env.BASE_URL}/deleteBudgetItem`, (req, res) => {
   const {id} = JSON.parse(req.apiGateway.event.body);
   const params = {
     Key: {
