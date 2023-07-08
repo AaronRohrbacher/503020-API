@@ -7,7 +7,7 @@ const moment = require('moment');
 const cors = require('cors');
 const IS_OFFLINE = process.env.IS_OFFLINE;
 
-app.use(cors({origin: `https://${process.env.STAGE_NAME}.bludget.com`}))
+app.use(cors({origin: `https://${process.env.STAGE_NAME}.bludget.com`}));
 
 let dynamoDb;
 let cognitoExpress;
