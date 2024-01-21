@@ -1,8 +1,9 @@
 service: fifty-thirty-twenty
 plugins:
-  - serverless-offline
-  - serverless-dynamodb-local
+  - serverless-dynamodb
   - serverless-offline-local-authorizers-plugin
+  - serverless-offline
+  
 custom:
   budgetsTableName: "budgets-${self:provider.stage}"
   budgetItemsTableName: "budget-items-${self:provider.stage}"
