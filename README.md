@@ -5,7 +5,7 @@
 
 *Prerequisites:*
 
-NodeJS, NPM
+NodeJS/NPM, Java Runtime Environment, AWS CLI
 
 Serverless Framework:
 
