@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "aws-sdk": "^2.1330.0",
+    "aws-sdk": "^2.1540.0",
     "cognito-express": "^3.0.2",
     "cors": "^2.8.5",
     "express": "^4.18.2",
@@ -12,8 +12,8 @@
     "cypress": "^12.9.0",
     "eslint": "^8.35.0",
     "eslint-config-google": "^0.14.0",
-    "serverless-dynamodb-local": "^0.2.40",
-    "serverless-offline": "^12.0.4",
+    "serverless-dynamodb": "^0.2.47",
+    "serverless-offline": "^13.3.3",
     "serverless-offline-local-authorizers-plugin": "^1.2.0"
   },
   "jest": {
