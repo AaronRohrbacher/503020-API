@@ -7,8 +7,6 @@ const moment = require('moment');
 const cors = require('cors');
 const IS_OFFLINE = process.env.IS_OFFLINE;
 
-app.use(cors({origin: `https://${process.env.STAGE_NAME}.bludget.com`}));
-
 let dynamoDb;
 let cognitoExpress;
 if (IS_OFFLINE === 'true') {
@@ -17,6 +15,7 @@ if (IS_OFFLINE === 'true') {
     endpoint: 'http://localhost:8000',
   });
 } else {
+  app.use(cors({origin: `https://${process.env.STAGE_NAME}.bludget.com`}));
   dynamoDb = new AWS.DynamoDB.DocumentClient();
   cognitoExpress = new CognitoExpress({
     region: 'us-west-2',
