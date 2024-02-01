@@ -49,6 +49,13 @@ const totalByPayPeriod = (budgetItems) => {
   };
 };
 
+const determinePayPeriod = () => {
+  if  (moment([moment().year(), moment().month(), moment().date()]) >= 15) {
+    return 15
+  }
+  return 1
+}
+
 const getCurrentMonth = () => {
   const month = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   return month[new Date().getMonth()];
@@ -218,7 +225,7 @@ app.post(`${process.env.BASE_URL}/createBudgetItem`, (req, res) => {
       id: (Date.now() + Math.random()).toString(),
       budgetId: budgetId,
       name: name,
-      cost: cost,
+      cost: parseFloat(cost),
       dueDate: dueDate,
       balance: balance,
       pending: pending,
@@ -267,6 +274,8 @@ app.post(`${process.env.BASE_URL}/readBudgetItems`, (req, res) => {
   getBudget(budgetId).then((budget) => {
     dynamoDb.query(params, (error, result) => {
       const perPeriod = totalByPayPeriod(result.Items);
+      let period
+      determinePayPeriod() < 15 ? period = perPeriod.pre15Total : period = perPeriod.post15Total;
       response = {
         BudgetItems: result.Items,
         budgetTotal: totalBudget(result.Items),
