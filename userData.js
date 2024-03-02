@@ -15,7 +15,7 @@ if (IS_OFFLINE === 'true') {
     endpoint: 'http://localhost:8000',
   });
 } else {
-  app.use(cors({origin: `https://${process.env.STAGE_NAME}.bludget.com`}));
+  app.use(cors({origin: '*'}));
   dynamoDb = new AWS.DynamoDB.DocumentClient();
   cognitoExpress = new CognitoExpress({
     region: 'us-west-2',
@@ -116,11 +116,11 @@ const paidItemBalance = (budgetItems) => {
   return paidBalance;
 };
 
-app.post(`${process.env.BASE_URL}/userData`, (req, res) => {
+app.post(`/userData`, (req, res) => {
   res.json(req.requestContext.authorizer.claims);
 });
 
-app.post(`${process.env.BASE_URL}/createBudget`, (req, res) => {
+app.post(`/createBudget`, (req, res) => {
   const {userId, budgetName, currentBankBalance, expectedPaycheckAmount} = JSON.parse(req.apiGateway.event.body);
   const id = (Date.now() + Math.random()).toString();
   const params = {
@@ -142,7 +142,7 @@ app.post(`${process.env.BASE_URL}/createBudget`, (req, res) => {
   });
 });
 
-app.post(`${process.env.BASE_URL}/readBudget`, (req, res) => {
+app.post(`/readBudget`, (req, res) => {
   const {id} = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
@@ -164,7 +164,7 @@ app.post(`${process.env.BASE_URL}/readBudget`, (req, res) => {
   });
 });
 
-app.post(`${process.env.BASE_URL}/readBudgets`, (req, res) => {
+app.post(`/readBudgets`, (req, res) => {
   const {userId} = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
@@ -186,7 +186,7 @@ app.post(`${process.env.BASE_URL}/readBudgets`, (req, res) => {
   });
 });
 
-app.post(`${process.env.BASE_URL}/updateBudget`, (req, res) => {
+app.post(`/updateBudget`, (req, res) => {
   const {id, userId, budgetName, currentBankBalance, expectedPaycheckAmount} = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
@@ -209,7 +209,7 @@ app.post(`${process.env.BASE_URL}/updateBudget`, (req, res) => {
   });
 });
 
-app.delete(`${process.env.BASE_URL}/deleteBudget`, (req, res) => {
+app.delete(`/deleteBudget`, (req, res) => {
   const {id, budgetName} = JSON.parse(req.apiGateway.event.body);
   const params = {
     Key: {
@@ -226,7 +226,7 @@ app.delete(`${process.env.BASE_URL}/deleteBudget`, (req, res) => {
   });
 });
 
-app.post(`${process.env.BASE_URL}/createBudgetItem`, (req, res) => {
+app.post(`/createBudgetItem`, (req, res) => {
   console.log(req);
   const {budgetId, name, cost, dueDate, balance, pending, paid} = JSON.parse(req.apiGateway.event.body);
   const params = {
@@ -250,7 +250,7 @@ app.post(`${process.env.BASE_URL}/createBudgetItem`, (req, res) => {
   });
 });
 
-app.post(`${process.env.BASE_URL}/readBudgetItem`, (req, res) => {
+app.post(`/readBudgetItem`, (req, res) => {
   const {id} = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
@@ -272,7 +272,7 @@ app.post(`${process.env.BASE_URL}/readBudgetItem`, (req, res) => {
   });
 });
 
-app.post(`${process.env.BASE_URL}/readBudgetItems`, (req, res) => {
+app.post(`/readBudgetItems`, (req, res) => {
   const {budgetId} = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
@@ -307,7 +307,7 @@ app.post(`${process.env.BASE_URL}/readBudgetItems`, (req, res) => {
   });
 });
 
-app.post(`${process.env.BASE_URL}/updateBudgetItem`, (req, res) => {
+app.post(`/updateBudgetItem`, (req, res) => {
   const {id, budgetId, name, cost, dueDate, balance, pending, paid} = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
@@ -333,7 +333,7 @@ app.post(`${process.env.BASE_URL}/updateBudgetItem`, (req, res) => {
   });
 });
 
-app.delete(`${process.env.BASE_URL}/deleteBudgetItem`, (req, res) => {
+app.delete(`/deleteBudgetItem`, (req, res) => {
   const {id} = JSON.parse(req.apiGateway.event.body);
   const params = {
     Key: {

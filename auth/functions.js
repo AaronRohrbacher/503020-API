@@ -4,7 +4,7 @@ const sendResponse = (statusCode, body) => {
     body: JSON.stringify(body),
     headers: {
       'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': 'https://dev.bludget.com',
+      'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Credentials': true,
     },
   };
