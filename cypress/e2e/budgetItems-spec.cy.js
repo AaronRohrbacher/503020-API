@@ -12,11 +12,11 @@ describe('POST budgetItems CRUD:', () => {
       budgetId = result.body.Items[0].id;
       cy.request('POST', '/createBudgetItem', {
         budgetId: budgetId,
-        name: "name",
-        cost: "3.51",
-        dueDate: "15",
+        name: 'name',
+        cost: '3.51',
+        dueDate: '15',
         pending: false,
-        userId: "1a"
+        userId: '1a',
       });
     });
   });
@@ -25,7 +25,7 @@ describe('POST budgetItems CRUD:', () => {
       expect(response.body.BudgetItems[0]).to.have.property('budgetId', budgetId);
       expect(response.body.BudgetItems[0]).to.have.property('name', 'name');
       expect(response.body.BudgetItems[0]).to.have.property('cost', 3.51);
-      expect(response.body.BudgetItems[0]).to.have.property('dueDate', "15");
+      expect(response.body.BudgetItems[0]).to.have.property('dueDate', '15');
     });
   });
   it('reads a budgetItem', () => {
@@ -38,7 +38,7 @@ describe('POST budgetItems CRUD:', () => {
   });
   it('updates a budgetItem', () => {
     cy.request('POST', '/readBudgetItems', {budgetId: budgetId}).then((response) => {
-      cy.request('POST', '/updateBudgetItem', {id: response.body.BudgetItems[0].id, name: 'edited Name', cost: "4.20", dueDate: "122"});
+      cy.request('POST', '/updateBudgetItem', {id: response.body.BudgetItems[0].id, name: 'edited Name', cost: '4.20', dueDate: '122'});
       cy.request('POST', '/readBudgetItem', {id: response.body.BudgetItems[0].id}).then((response) => {
         expect(response.body.Items[0]).to.have.property('name', 'edited Name');
       });
