@@ -14,15 +14,15 @@ if (IS_OFFLINE === 'true') {
     region: 'localhost',
     endpoint: 'http://localhost:8000',
   });
-} else {
-  app.use(cors({origin: `https://${process.env.STAGE_NAME}.bludget.com`}));
-  dynamoDb = new AWS.DynamoDB.DocumentClient();
-  cognitoExpress = new CognitoExpress({
-    region: 'us-west-2',
-    cognitoUserPoolId: process.env.user_pool_id,
-    tokenUse: 'id', // Possible Values: access | id
-    tokenExpiration: 3600000, // Up to default expiration of 1 hour (3600000 ms)
-  });
+// } else {
+//   app.use(cors({origin: `https://${process.env.STAGE_NAME}.bludget.com`}));
+//   dynamoDb = new AWS.DynamoDB.DocumentClient();
+//   cognitoExpress = new CognitoExpress({
+//     region: 'us-west-2',
+//     cognitoUserPoolId: process.env.user_pool_id,
+//     tokenUse: 'id', // Possible Values: access | id
+//     tokenExpiration: 3600000, // Up to default expiration of 1 hour (3600000 ms)
+//   });
 }
 
 const totalBudget = (budgetItems) => {
@@ -51,10 +51,7 @@ const totalByPayPeriod = (budgetItems) => {
 };
 
 const determinePayPeriod = () => {
-  if  (moment().date() >= 15) {
-    return 15
-  }
-  return 1
+  return moment().date() >= 15 ? 15 : 1
 }
 
 const getCurrentMonth = () => {
@@ -353,3 +350,5 @@ app.delete(`${process.env.BASE_URL}/deleteBudgetItem`, (req, res) => {
 });
 
 module.exports.handler = serverless(app);
+module.exports = {determinePayPeriod}
+
