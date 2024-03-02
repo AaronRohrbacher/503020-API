@@ -20,6 +20,6 @@
   "scripts": {
     "lint": "eslint './**/*.js' --fix",
     "test": "npx cypress run",
-    "jest": "jest"
+    "jest": "TEST=true; jest; TEST=false"
   }
 }

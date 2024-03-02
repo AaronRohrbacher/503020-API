@@ -350,4 +350,6 @@ app.delete(`${process.env.BASE_URL}/deleteBudgetItem`, (req, res) => {
 });
 
 module.exports.handler = serverless(app);
-module.exports = {determinePayPeriod};
+if (process.env.TEST == 'true') {
+  module.exports = {determinePayPeriod};
+};
