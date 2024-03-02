@@ -46,6 +46,7 @@ const totalByPayPeriod = (budgetItems) => {
   return {
     pre15Total: pre15Total,
     post15Total: post15Total,
+    wholeMonthTotal: pre15Total + post15Total,
   };
 };
 
@@ -293,16 +294,16 @@ app.post(`${process.env.BASE_URL}/readBudgetItems`, (req, res) => {
       response = {
         BudgetItems: result.Items,
         budgetTotal: "$" + totalBudget(result.Items).toFixed(2),
-        pre15Total: perPeriod.pre15Total,
-        post15Total: perPeriod.post15Total,
+        pre15Total: "$" + perPeriod.pre15Total.toFixed(2),
+        post15Total: "$" + perPeriod.post15Total.toFixed(2),
         currentMonth: getCurrentMonth(),
         numberOfDaysUntilNextPay: numberOfDaysUntilNextPay(),
-        dailyBudget: (budget.currentBankBalance - period + paidBalance) / numberOfDaysUntilNextPay(),
-        bankBalance: budget.currentBankBalance,
-        estimatedMonthlyDailySpending: expectedIncome(budget) / 31,
-        expectedIncome: expectedIncome(budget),
-        pendingItemBalance: pendingItemBalance(result.Items),
-        paidItemBalance: paidItemBalance(result.Items)
+        dailyBudget: "$" + ((budget.currentBankBalance - period + paidBalance) / numberOfDaysUntilNextPay()).toFixed(2),
+        bankBalance: "$" + parseFloat(budget.currentBankBalance).toFixed(2),
+        estimatedMonthlyDailySpending: "$" + ((expectedIncome(budget) - perPeriod.wholeMonthTotal) / 31).toFixed(2),
+        expectedIncome: "$" + expectedIncome(budget).toFixed(2),
+        pendingItemBalance: "$" + pendingItemBalance(result.Items).toFixed(2),
+        paidItemBalance: "$" + paidItemBalance(result.Items).toFixed(2)
       };
       return res.json(response);
     });
