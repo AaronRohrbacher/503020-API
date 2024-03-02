@@ -107,6 +107,17 @@ const pendingItemBalance = (budgetItems) => {
   return pendingBalance;
 };
 
+const paidItemBalance = (budgetItems) => {
+  let paidBalance = 0;
+  budgetItems.forEach((item) => {
+    if (item.paid === true) {
+      paidBalance += item.cost;
+    }
+  });
+  console.log(paidBalance)
+  return paidBalance;
+}
+
 app.post(`${process.env.BASE_URL}/userData`, (req, res) => {
   res.json(req.requestContext.authorizer.claims);
 });
@@ -218,7 +229,7 @@ app.delete(`${process.env.BASE_URL}/deleteBudget`, (req, res) => {
 });
 
 app.post(`${process.env.BASE_URL}/createBudgetItem`, (req, res) => {
-  const {budgetId, name, cost, dueDate, balance, pending} = JSON.parse(req.apiGateway.event.body);
+  const {budgetId, name, cost, dueDate, balance, pending, paid} = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
     Item: {
@@ -229,6 +240,7 @@ app.post(`${process.env.BASE_URL}/createBudgetItem`, (req, res) => {
       dueDate: dueDate,
       balance: balance,
       pending: pending,
+      paid: paid,
     },
   };
   dynamoDb.put(params, (error) => {
@@ -276,6 +288,8 @@ app.post(`${process.env.BASE_URL}/readBudgetItems`, (req, res) => {
       const perPeriod = totalByPayPeriod(result.Items);
       let period
       determinePayPeriod() < 15 ? period = perPeriod.pre15Total : period = perPeriod.post15Total;
+      const paidBalance = paidItemBalance(result.Items)
+      console.log("BALANCE" + paidBalance)
       response = {
         BudgetItems: result.Items,
         budgetTotal: "$" + totalBudget(result.Items).toFixed(2),
@@ -283,11 +297,12 @@ app.post(`${process.env.BASE_URL}/readBudgetItems`, (req, res) => {
         post15Total: perPeriod.post15Total,
         currentMonth: getCurrentMonth(),
         numberOfDaysUntilNextPay: numberOfDaysUntilNextPay(),
-        dailyBudget: (budget.currentBankBalance - period) / numberOfDaysUntilNextPay(),
+        dailyBudget: (budget.currentBankBalance - period + paidBalance) / numberOfDaysUntilNextPay(),
         bankBalance: budget.currentBankBalance,
         estimatedMonthlyDailySpending: expectedIncome(budget) / 31,
         expectedIncome: expectedIncome(budget),
         pendingItemBalance: pendingItemBalance(result.Items),
+        paidItemBalance: paidItemBalance(result.Items)
       };
       return res.json(response);
     });
@@ -295,7 +310,7 @@ app.post(`${process.env.BASE_URL}/readBudgetItems`, (req, res) => {
 });
 
 app.post(`${process.env.BASE_URL}/updateBudgetItem`, (req, res) => {
-  const {id, budgetId, name, cost, dueDate, balance, pending} = JSON.parse(req.apiGateway.event.body);
+  const {id, budgetId, name, cost, dueDate, balance, pending, paid} = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
     Key: {
@@ -309,6 +324,7 @@ app.post(`${process.env.BASE_URL}/updateBudgetItem`, (req, res) => {
       dueDate: dueDate,
       balance: balance,
       pending: pending,
+      paid: paid,
     },
   };
   dynamoDb.put(params, (error) => {
