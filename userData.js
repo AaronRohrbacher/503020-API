@@ -230,6 +230,7 @@ app.delete(`${process.env.BASE_URL}/deleteBudget`, (req, res) => {
 });
 
 app.post(`${process.env.BASE_URL}/createBudgetItem`, (req, res) => {
+  console.log(req)
   const {budgetId, name, cost, dueDate, balance, pending, paid} = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
@@ -290,7 +291,6 @@ app.post(`${process.env.BASE_URL}/readBudgetItems`, (req, res) => {
       let period
       determinePayPeriod() < 15 ? period = perPeriod.pre15Total : period = perPeriod.post15Total;
       const paidBalance = paidItemBalance(result.Items)
-      console.log("BALANCE" + paidBalance)
       response = {
         BudgetItems: result.Items,
         budgetTotal: "$" + totalBudget(result.Items).toFixed(2),
@@ -303,7 +303,7 @@ app.post(`${process.env.BASE_URL}/readBudgetItems`, (req, res) => {
         estimatedMonthlyDailySpending: "$" + ((expectedIncome(budget) - perPeriod.wholeMonthTotal) / 31).toFixed(2),
         expectedIncome: "$" + expectedIncome(budget).toFixed(2),
         pendingItemBalance: "$" + pendingItemBalance(result.Items).toFixed(2),
-        paidItemBalance: "$" + paidItemBalance(result.Items).toFixed(2)
+        paidItemBalance: "$" + paidBalance.toFixed(2)
       };
       return res.json(response);
     });
