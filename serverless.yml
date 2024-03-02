@@ -178,6 +178,7 @@ functions:
       - http:
           path: /deleteBudget
           method: delete
+          cors: true
           authorizer:
             name: 503020_authorizer
             type: COGNITO_USER_POOLS
