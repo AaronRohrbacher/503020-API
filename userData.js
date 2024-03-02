@@ -14,15 +14,15 @@ if (IS_OFFLINE === 'true') {
     region: 'localhost',
     endpoint: 'http://localhost:8000',
   });
-} else {
-  app.use(cors({origin: `https://${process.env.STAGE_NAME}.bludget.com`}));
-  dynamoDb = new AWS.DynamoDB.DocumentClient();
-  cognitoExpress = new CognitoExpress({
-    region: 'us-west-2',
-    cognitoUserPoolId: process.env.user_pool_id,
-    tokenUse: 'id', // Possible Values: access | id
-    tokenExpiration: 3600000, // Up to default expiration of 1 hour (3600000 ms)
-  });
+// } else {
+//   app.use(cors({origin: `https://${process.env.STAGE_NAME}.bludget.com`}));
+//   dynamoDb = new AWS.DynamoDB.DocumentClient();
+//   cognitoExpress = new CognitoExpress({
+//     region: 'us-west-2',
+//     cognitoUserPoolId: process.env.user_pool_id,
+//     tokenUse: 'id', // Possible Values: access | id
+//     tokenExpiration: 3600000, // Up to default expiration of 1 hour (3600000 ms)
+//   });
 }
 
 const totalBudget = (budgetItems) => {
@@ -30,7 +30,7 @@ const totalBudget = (budgetItems) => {
   budgetItems.forEach((item) => {
     total += item.cost;
   });
-  return total;
+  return parseFloat(total);
 };
 
 const totalByPayPeriod = (budgetItems) => {
@@ -46,8 +46,13 @@ const totalByPayPeriod = (budgetItems) => {
   return {
     pre15Total: pre15Total,
     post15Total: post15Total,
+    wholeMonthTotal: pre15Total + post15Total,
   };
 };
+
+const determinePayPeriod = () => {
+  return moment().date() >= 15 ? 15 : 1
+}
 
 const getCurrentMonth = () => {
   const month = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -99,6 +104,17 @@ const pendingItemBalance = (budgetItems) => {
   });
   return pendingBalance;
 };
+
+const paidItemBalance = (budgetItems) => {
+  let paidBalance = 0;
+  budgetItems.forEach((item) => {
+    if (item.paid === true) {
+      paidBalance += item.cost;
+    }
+  });
+  console.log(paidBalance)
+  return paidBalance;
+}
 
 app.post(`${process.env.BASE_URL}/userData`, (req, res) => {
   res.json(req.requestContext.authorizer.claims);
@@ -211,17 +227,19 @@ app.delete(`${process.env.BASE_URL}/deleteBudget`, (req, res) => {
 });
 
 app.post(`${process.env.BASE_URL}/createBudgetItem`, (req, res) => {
-  const {budgetId, name, cost, dueDate, balance, pending} = JSON.parse(req.apiGateway.event.body);
+  console.log(req)
+  const {budgetId, name, cost, dueDate, balance, pending, paid} = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
     Item: {
       id: (Date.now() + Math.random()).toString(),
       budgetId: budgetId,
       name: name,
-      cost: cost,
+      cost: parseFloat(cost),
       dueDate: dueDate,
       balance: balance,
       pending: pending,
+      paid: paid,
     },
   };
   dynamoDb.put(params, (error) => {
@@ -267,18 +285,22 @@ app.post(`${process.env.BASE_URL}/readBudgetItems`, (req, res) => {
   getBudget(budgetId).then((budget) => {
     dynamoDb.query(params, (error, result) => {
       const perPeriod = totalByPayPeriod(result.Items);
+      let period
+      determinePayPeriod() < 15 ? period = perPeriod.pre15Total : period = perPeriod.post15Total;
+      const paidBalance = paidItemBalance(result.Items)
       response = {
         BudgetItems: result.Items,
-        budgetTotal: totalBudget(result.Items),
-        pre15Total: perPeriod.pre15Total,
-        post15Total: perPeriod.post15Total,
+        budgetTotal: "$" + totalBudget(result.Items).toFixed(2),
+        pre15Total: "$" + perPeriod.pre15Total.toFixed(2),
+        post15Total: "$" + perPeriod.post15Total.toFixed(2),
         currentMonth: getCurrentMonth(),
         numberOfDaysUntilNextPay: numberOfDaysUntilNextPay(),
-        dailyBudget: budget.currentBankBalance / numberOfDaysUntilNextPay(),
-        bankBalance: budget.currentBankBalance,
-        estimatedMonthlyDailySpending: expectedIncome(budget) / 31,
-        expectedIncome: expectedIncome(budget),
-        pendingItemBalance: pendingItemBalance(result.Items),
+        dailyBudget: "$" + ((budget.currentBankBalance - period + paidBalance) / numberOfDaysUntilNextPay()).toFixed(2),
+        bankBalance: "$" + parseFloat(budget.currentBankBalance).toFixed(2),
+        estimatedMonthlyDailySpending: "$" + ((expectedIncome(budget) - perPeriod.wholeMonthTotal) / 31).toFixed(2),
+        expectedIncome: "$" + expectedIncome(budget).toFixed(2),
+        pendingItemBalance: "$" + pendingItemBalance(result.Items).toFixed(2),
+        paidItemBalance: "$" + paidBalance.toFixed(2)
       };
       return res.json(response);
     });
@@ -286,7 +308,7 @@ app.post(`${process.env.BASE_URL}/readBudgetItems`, (req, res) => {
 });
 
 app.post(`${process.env.BASE_URL}/updateBudgetItem`, (req, res) => {
-  const {id, budgetId, name, cost, dueDate, balance, pending} = JSON.parse(req.apiGateway.event.body);
+  const {id, budgetId, name, cost, dueDate, balance, pending, paid} = JSON.parse(req.apiGateway.event.body);
   const params = {
     TableName: process.env.BUDGET_ITEMS_TABLE,
     Key: {
@@ -300,6 +322,7 @@ app.post(`${process.env.BASE_URL}/updateBudgetItem`, (req, res) => {
       dueDate: dueDate,
       balance: balance,
       pending: pending,
+      paid: paid,
     },
   };
   dynamoDb.put(params, (error) => {
@@ -327,3 +350,5 @@ app.delete(`${process.env.BASE_URL}/deleteBudgetItem`, (req, res) => {
 });
 
 module.exports.handler = serverless(app);
+module.exports = {determinePayPeriod}
+

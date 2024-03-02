@@ -304,6 +304,8 @@ resources:
             AttributeType: S
           - AttributeName: budgetId
             AttributeType: S
+          - AttributeName: dueDate
+            AttributeType: S
         KeySchema:
           - AttributeName: id
             KeyType: HASH
@@ -321,6 +323,8 @@ resources:
             KeySchema:
               - AttributeName: budgetId
                 KeyType: HASH
+              - AttributeName: dueDate
+                KeyType: RANGE
             Projection:
               ProjectionType: "ALL"
             ProvisionedThroughput:
