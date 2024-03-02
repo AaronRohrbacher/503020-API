@@ -18,8 +18,8 @@
     "serverless-offline-local-authorizers-plugin": "^1.2.0"
   },
   "scripts": {
-    "lint": "eslint './**/*.js' --fix",
-    "test": "npx cypress run",
-    "jest": "TEST=true; jest; TEST=false"
+    "test": "scripts/check_serverless_status.sh; TEST=true; jest; TEST=false; npx cypress run;",
+    "kill": "scripts/kill_serverless_processes.sh",
+    "lint": "eslint './**/*.js' --fix"
   }
 }
