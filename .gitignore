@@ -11,3 +11,4 @@ cypress/screenshots
 cypress/videos
 
 .env
+nohup.out
