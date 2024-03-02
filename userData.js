@@ -30,7 +30,7 @@ const totalBudget = (budgetItems) => {
   budgetItems.forEach((item) => {
     total += item.cost;
   });
-  return total;
+  return parseFloat(total);
 };
 
 const totalByPayPeriod = (budgetItems) => {
@@ -50,7 +50,7 @@ const totalByPayPeriod = (budgetItems) => {
 };
 
 const determinePayPeriod = () => {
-  if  (moment([moment().year(), moment().month(), moment().date()]) >= 15) {
+  if  (moment().date() >= 15) {
     return 15
   }
   return 1
@@ -278,12 +278,12 @@ app.post(`${process.env.BASE_URL}/readBudgetItems`, (req, res) => {
       determinePayPeriod() < 15 ? period = perPeriod.pre15Total : period = perPeriod.post15Total;
       response = {
         BudgetItems: result.Items,
-        budgetTotal: totalBudget(result.Items),
+        budgetTotal: "$" + totalBudget(result.Items).toFixed(2),
         pre15Total: perPeriod.pre15Total,
         post15Total: perPeriod.post15Total,
         currentMonth: getCurrentMonth(),
         numberOfDaysUntilNextPay: numberOfDaysUntilNextPay(),
-        dailyBudget: budget.currentBankBalance / numberOfDaysUntilNextPay(),
+        dailyBudget: (budget.currentBankBalance - period) / numberOfDaysUntilNextPay(),
         bankBalance: budget.currentBankBalance,
         estimatedMonthlyDailySpending: expectedIncome(budget) / 31,
         expectedIncome: expectedIncome(budget),
