@@ -6,13 +6,11 @@ const {application} = require('express');
 const cognito = new AWS.CognitoIdentityServiceProvider();
 
 module.exports.handler = async (event) => {
-  console.log(event);
   try {
     const isValid = validateInput(event.body);
     if (!isValid) {
       return sendResponse(400, {message: 'Invalid input'});
     }
-    console.log(process.env.ENV);
     if (process.env.ENV === 'local') {
       return sendResponse(200, {
         message: 'Success',
