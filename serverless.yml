@@ -273,6 +273,7 @@ functions:
       - http:
           path: /deleteBudgetItem
           method: delete
+          cors: true
           authorizer:
             name: 503020_authorizer
             type: COGNITO_USER_POOLS
