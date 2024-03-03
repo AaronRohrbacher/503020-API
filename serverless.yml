@@ -62,6 +62,7 @@ provider:
     client_id: { Ref: 503020UserPoolClient }
     STAGE_NAME: ${self:provider.stage} 
     VERSION_NUMBER: "v1"
+    ENV: "local"
 functions:
   signup:
     handler: auth/signup.handler
