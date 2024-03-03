@@ -307,7 +307,7 @@ resources:
           - AttributeName: budgetId
             AttributeType: S
           - AttributeName: dueDate
-            AttributeType: S
+            AttributeType: N
         KeySchema:
           - AttributeName: id
             KeyType: HASH
